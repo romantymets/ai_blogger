@@ -20,7 +20,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={classNames(inter.className, 'h-screen flex flex-col')}>
+      <body
+        className={classNames(inter.className, 'min-h-screen flex flex-col')}
+      >
         <Navbar />
         <main className="flex flex-col flex-1 items-center overflow-x-hidden">
           {children}
