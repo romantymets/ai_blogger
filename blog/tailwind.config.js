@@ -1,3 +1,5 @@
+import colors from 'tailwindcss/colors'
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -6,6 +8,17 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    screens: {
+      sm: '600px',
+      md: '900px',
+      lg: '1200px',
+      xl: '1440px',
+    },
+    colors: {
+      ...colors,
+      gallery: '#EFEFEFCC',
+      royalBlue: '#3652E1',
+    },
     extend: {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
@@ -14,5 +27,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: ['@tailwindcss/forms'],
 }
