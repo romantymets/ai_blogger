@@ -27,5 +27,11 @@ module.exports = {
       },
     },
   },
-  plugins: ['@tailwindcss/forms'],
+  plugins: [
+    '@tailwindcss/forms',
+    function ({ addVariant }) {
+      addVariant('child', '& > *')
+      addVariant('child-hover', '& > *:hover')
+    },
+  ],
 }

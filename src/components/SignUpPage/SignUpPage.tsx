@@ -1,13 +1,22 @@
 'use client'
 import { useState, ChangeEvent } from 'react'
+import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
+
 import Link from 'next/link'
 import Image from 'next/image'
+
 import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
 
+import { userService } from '@/services/user.service'
+import { alertService } from '@/services/alerts-service'
+
+import useToggle from '@/hooks/useToggle'
+
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
-import { SIGN_UP, LOG_IN } from '@/constants/navigationLinks'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
+
+import { SIGN_UP, LOG_IN } from '@/constants/navigationLinks'
 import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
 
 interface IDefaultValues {
@@ -19,6 +28,9 @@ interface IDefaultValues {
 
 const SignUpPage = () => {
   const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const { open: loading, onOpen, onClose } = useToggle()
+
+  const router = useRouter()
 
   const defaultValues: IDefaultValues = {
     userName: '',
@@ -36,7 +48,32 @@ const SignUpPage = () => {
     mode: 'onBlur',
   })
 
-  const onSubmit = (data: IDefaultValues) => console.log(data)
+  const onSubmit = (data: IDefaultValues) => {
+    onOpen()
+    const formData = new FormData()
+    formData.append('userName', data.userName)
+    formData.append('email', data.email)
+    formData.append('password', data.password)
+    formData.append('aboutUser', data.aboutUser)
+    if (selectedImage) {
+      formData.append('image', selectedImage)
+    }
+    userService
+      .register(formData)
+      .then(() => {
+        alertService.success('Registration successful')
+        onClose()
+        router.push(LOG_IN.href)
+      })
+      .catch((error) => {
+        console.error(error)
+        alertService.error(error.message || 'Registration failed')
+        onClose()
+      })
+      .finally(() => {
+        onClose()
+      })
+  }
 
   const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
     if (event?.target?.files) {
@@ -201,7 +238,12 @@ const SignUpPage = () => {
             </div>
           </div>
           <div className="mt-6 flex items-center justify-end gap-x-6">
-            <BluButton title={SIGN_UP.name} type={'submit'} />
+            <BluButton
+              title={SIGN_UP.name}
+              type={'submit'}
+              disabled={loading}
+              loading={loading}
+            />
           </div>
         </div>
         <p className="mt-10 text-center text-sm text-gray-500">

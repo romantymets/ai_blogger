@@ -5,6 +5,7 @@ import Footer from '@/components/Footer'
 import Navbar from '../components/Navbar'
 import './globals.css'
 import { classNames } from '@/utils/classNames'
+import Alert from '@/components/Alert'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,6 +25,7 @@ export default function RootLayout({
         className={classNames(inter.className, 'min-h-screen flex flex-col')}
       >
         <Navbar />
+        <Alert />
         <main className="flex flex-col flex-1 items-center overflow-x-hidden">
           {children}
         </main>

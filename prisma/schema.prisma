@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url = env("DATABASE_URL")
+}
+
+
+model Users {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  email String  @unique
+  userName  String
+  image String?
+  aboutUser String?
+  hashedPassword String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  favoriteIds String[] @db.ObjectId
+  posts Posts[]
+  account Accounts[]
+  comments Comments[]
+}
+
+model Accounts {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String @db.ObjectId
+  refresh_token String? @db.String
+  access_token String? @db.String
+  expires_at Int?
+
+  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Posts {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  title     String
+  content   String?
+  image String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  published Boolean @default(false)
+  author    Users @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String @db.ObjectId
+  comments Comments[]
+}
+
+
+model Comments {
+  id  String @id @default(auto()) @map("_id") @db.ObjectId
+  content   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    Users @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String @db.ObjectId
+
+  post    Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId  String @db.ObjectId
+}
+

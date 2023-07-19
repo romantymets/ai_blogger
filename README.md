@@ -4,6 +4,14 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 First, run the development server:
 
+api run:
+
+prisma generate
+
+api documentation:
+
+/api-doc
+
 ```bash
 npm run dev
 # or
