@@ -56,8 +56,10 @@ export const login = async (email: string, password: string) => {
   }
 }
 
+// TODO next task
 const logout = async (refreshToken: string) => await removeToken(refreshToken)
 
+// TODO next task
 const refresh = async (refreshToken: string) => {
   if (!refreshToken) {
     throw ApiError.BadRequest('Unauthorized')

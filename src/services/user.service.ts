@@ -12,6 +12,7 @@ async function register(user: FormData) {
   return await fetchWrapper.post(`${baseAuthUrl}/registration`, user)
 }
 
+// TODO next task
 const logout = () => {
   console.log('logout')
 }
