@@ -9,7 +9,12 @@ import useToggle from '@/hooks/useToggle'
 import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
-import { HOME, SIGN_UP, RESET_PASSWORD } from '@/constants/navigationLinks'
+import {
+  HOME,
+  LOG_IN,
+  RESET_PASSWORD,
+  SIGN_UP,
+} from '@/constants/navigationLinks'
 import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
@@ -19,19 +24,22 @@ import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput/Passwo
 interface IDefaultValues {
   email: string
   password: string
+  confirmPassword: string
 }
 
-const LoginPage = () => {
+const ResetPasswordPage = () => {
   const router = useRouter()
   const { open: loading, onOpen, onClose } = useToggle()
   const defaultValues: IDefaultValues = {
     email: '',
     password: '',
+    confirmPassword: '',
   }
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm({
     defaultValues,
@@ -41,10 +49,16 @@ const LoginPage = () => {
   const onSubmit = ({ email, password }: IDefaultValues) => {
     onOpen()
     return userService
-      .login(email, password)
-      .then(() => {
-        alertService.success('Authorization successful')
+      .resetPassword(email, password)
+      .then((result) => {
+        const currentUser = userService.userValue
+        alertService.success('Password successful updated')
         onClose()
+        if (currentUser?.userId === result?.userId) {
+          userService.logout()
+          router.push(LOG_IN.href)
+          return
+        }
         router.push(HOME.href)
       })
       .catch((e) => {
@@ -54,12 +68,14 @@ const LoginPage = () => {
       })
   }
 
+  const [password] = watch(['password'])
+
   return (
     <Fragment>
       <div className="flex min-h-full w-full flex-1 flex-col justify-center px-6 py-3 lg:px-2">
         <div className="sm:mx-auto sm:w-full sm:max-w-sm">
           <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-            Sign in to your account
+            Reset password
           </h2>
         </div>
 
@@ -99,18 +115,28 @@ const LoginPage = () => {
               })}
             />
 
-            <p className="mt-10 text-right text-sm text-gray-500">
-              <Link
-                href={RESET_PASSWORD.href}
-                className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
-              >
-                Forgot password?
-              </Link>
-            </p>
+            <PasswordInput
+              id={'confirmPassword'}
+              name={'confirmPassword'}
+              autoComplete={'password'}
+              label={'Confirm password'}
+              error={Boolean(errors.confirmPassword)}
+              helperText={errors.confirmPassword?.message}
+              register={register('confirmPassword', {
+                required: 'Confirm password is required',
+                pattern: {
+                  value: PasswordRegExp,
+                  message:
+                    'Minimum eight characters, at least one letter and one number',
+                },
+                validate: (value: string) =>
+                  value === password || 'Passwords do not match',
+              })}
+            />
 
             <div>
               <BluButton
-                title={'Sign in'}
+                title={RESET_PASSWORD.name}
                 type="submit"
                 loading={loading}
                 disabled={loading}
@@ -133,4 +159,4 @@ const LoginPage = () => {
   )
 }
 
-export default LoginPage
+export default ResetPasswordPage

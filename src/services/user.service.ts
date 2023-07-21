@@ -24,6 +24,13 @@ const login = async (email: string, password: string) => {
   saveUser(userRes)
 }
 
+const resetPassword = async (email: string, newPassword: string) => {
+  return await fetchWrapper.post(`${baseAuthUrl}/reset-password`, {
+    email,
+    newPassword,
+  })
+}
+
 const logout = () => {
   localStorage.removeItem('user')
   userSubject.next(null)
@@ -33,6 +40,7 @@ export const userService = {
   register,
   logout,
   login,
+  resetPassword,
   user: userSubject.asObservable(),
   get userValue() {
     return userSubject.value

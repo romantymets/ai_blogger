@@ -3,7 +3,7 @@ import { alertService } from '@/services/alerts-service'
 import { redirect } from 'next/navigation'
 import { LOG_IN } from '@/constants/navigationLinks'
 
-export const privateApi = ['api/user', 'api/post']
+export const privateApi = ['api/users', 'api/post']
 
 interface RequestOptions {
   method: string

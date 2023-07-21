@@ -36,7 +36,7 @@ export const registration = async (payload: CreateUserCredential) => {
 export const login = async (email: string, password: string) => {
   const candidate = await findUserFromDbByEmail(email)
   if (!candidate) {
-    throw ApiError.BadRequest(`user with ${email} not found`)
+    throw ApiError.BadRequest(`User with ${email} not found`)
   }
 
   const isPassEquals = await bcrypt.compare(password, candidate.hashedPassword)
@@ -78,4 +78,21 @@ export const refresh = async (refreshToken: string) => {
     ...userDto,
     image: user?.image ? await generateImageUrl(user.image) : null,
   }
+}
+
+export const resetPassword = async (email: string, password: string) => {
+  const candidate = await findUserFromDbByEmail(email)
+  if (!candidate) {
+    throw ApiError.BadRequest(`User with ${email} not found`)
+  }
+  const hashedPassword = await bcrypt.hash(password, 3)
+  const user = await prisma.users.update({
+    where: {
+      id: candidate.id,
+    },
+    data: {
+      hashedPassword,
+    },
+  })
+  return generateUserDto(user)
 }
