@@ -39,8 +39,13 @@ function request(method: string) {
     }
     let response = await fetch(url, requestOptions)
     if (!response.ok) {
+      const isPrivateApi = privateApi.find((el) => url.startsWith(el))
       const errorData = await response.json()
-      if ([401, 403].includes(response.status) && userService.userValue) {
+      if (
+        [401, 403].includes(response.status) &&
+        userService.userValue &&
+        isPrivateApi
+      ) {
         // auto refresh if 401 Unauthorized or 403 Forbidden response returned from api
         try {
           const refreshRes = await fetch(`${baseAuthUrl}/refresh`, {

@@ -1,16 +1,20 @@
 'use client'
-
+import { Fragment } from 'react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
-import { HOME, SIGN_UP } from '@/constants/navigationLinks'
-import TextInput from '@/components/UIComponents/Inputs/TextInput'
-import { Fragment } from 'react'
-import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
-import BluButton from '@/components/UIComponents/Buttons/BluButton'
-import { userService } from '@/services/user.service'
 import { useRouter } from 'next/navigation'
-import { alertService } from '@/services/alerts-service'
+
 import useToggle from '@/hooks/useToggle'
+
+import { userService } from '@/services/user.service'
+import { alertService } from '@/services/alerts-service'
+
+import { HOME, SIGN_UP } from '@/constants/navigationLinks'
+import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
+
+import TextInput from '@/components/UIComponents/Inputs/TextInput'
+import BluButton from '@/components/UIComponents/Buttons/BluButton'
+import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput/PasswordInput'
 
 interface IDefaultValues {
   email: string
@@ -78,10 +82,9 @@ const LoginPage = () => {
               })}
             />
 
-            <TextInput
+            <PasswordInput
               id={'password'}
               name={'password'}
-              type={'password'}
               autoComplete={'password'}
               label={'Password'}
               error={Boolean(errors.password)}
