@@ -1,7 +1,7 @@
-import { Fragment } from 'react'
+import EditProfileComponent from '@/components/EditProfile'
 
 const EditProfile = () => {
-  return <Fragment>edit</Fragment>
+  return <EditProfileComponent />
 }
 
 export default EditProfile

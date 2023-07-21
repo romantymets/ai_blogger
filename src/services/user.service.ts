@@ -1,26 +1,40 @@
-import { fetchWrapper } from '@/helpers/fetch-wrapper.js'
+import { fetchWrapper } from '@/helpers/fetch-wrapper'
+import { BehaviorSubject } from 'rxjs'
+import { IUserValue } from '@/models/userServiceModel'
+export const baseAuthUrl = '/api/auth'
 
-interface IUserValue {
-  userName?: string
-  accessToken?: string
-  refreshToken?: string
+export const saveUser = (user: IUserValue) => {
+  userSubject.next(user)
+  localStorage.setItem('user', JSON.stringify(user))
 }
 
-const baseAuthUrl = '/api/auth'
+const userSubject = new BehaviorSubject(
+  typeof window !== 'undefined' && JSON.parse(localStorage.getItem('user'))
+)
 
-async function register(user: FormData) {
+const register = async (user: FormData) => {
   return await fetchWrapper.post(`${baseAuthUrl}/registration`, user)
 }
 
-// TODO next task
-const logout = () => {
-  console.log('logout')
+const login = async (email: string, password: string) => {
+  const userRes = await fetchWrapper.post(`${baseAuthUrl}/login`, {
+    email,
+    password,
+  })
+  saveUser(userRes)
 }
 
-const userValue: IUserValue = {}
+const logout = () => {
+  localStorage.removeItem('user')
+  userSubject.next(null)
+}
 
 export const userService = {
   register,
   logout,
-  userValue,
+  login,
+  user: userSubject.asObservable(),
+  get userValue() {
+    return userSubject.value
+  },
 }

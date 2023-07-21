@@ -11,3 +11,12 @@ export interface UserDto {
   userId: string
   userName: string
 }
+
+export interface IUserValue {
+  userName: string
+  userId: string
+  email: string
+  accessToken: string
+  refreshToken: string
+  image?: string | null
+}

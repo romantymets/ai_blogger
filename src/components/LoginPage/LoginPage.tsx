@@ -2,11 +2,15 @@
 
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
-import { SIGN_UP } from '@/constants/navigationLinks'
+import { HOME, SIGN_UP } from '@/constants/navigationLinks'
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
 import { Fragment } from 'react'
 import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
+import { userService } from '@/services/user.service'
+import { useRouter } from 'next/navigation'
+import { alertService } from '@/services/alerts-service'
+import useToggle from '@/hooks/useToggle'
 
 interface IDefaultValues {
   email: string
@@ -14,6 +18,8 @@ interface IDefaultValues {
 }
 
 const LoginPage = () => {
+  const router = useRouter()
+  const { open: loading, onOpen, onClose } = useToggle()
   const defaultValues: IDefaultValues = {
     email: '',
     password: '',
@@ -28,7 +34,21 @@ const LoginPage = () => {
     mode: 'onBlur',
   })
 
-  const onSubmit = (data: IDefaultValues) => console.log(data)
+  const onSubmit = ({ email, password }: IDefaultValues) => {
+    onOpen()
+    return userService
+      .login(email, password)
+      .then(() => {
+        alertService.success('Authorization successful')
+        onClose()
+        router.push(HOME.href)
+      })
+      .catch((e) => {
+        console.error(e)
+        alertService.error(e.message)
+        onClose()
+      })
+  }
 
   return (
     <Fragment>
@@ -77,7 +97,12 @@ const LoginPage = () => {
             />
 
             <div>
-              <BluButton title={'Sign in'} type="submit" />
+              <BluButton
+                title={'Sign in'}
+                type="submit"
+                loading={loading}
+                disabled={loading}
+              />
             </div>
           </form>
 

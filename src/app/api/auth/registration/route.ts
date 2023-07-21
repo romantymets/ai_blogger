@@ -56,17 +56,12 @@ export async function POST(request: NextRequest) {
     const aboutUser = formData.get('aboutUser') as string | ''
     const userName = formData.get('userName') as string | ''
     let fileName
-
     if (image) {
       const mimeType = image.type
       const fileExtension = mimeType.split('/')[1]
 
       const buffer = Buffer.from(await image.arrayBuffer())
-      fileName = await uploadImageToS3(
-        buffer,
-        uuid() + '.' + fileExtension,
-        fileExtension
-      )
+      fileName = await uploadImageToS3(buffer, uuid(), fileExtension)
     }
 
     const userData = await registration({

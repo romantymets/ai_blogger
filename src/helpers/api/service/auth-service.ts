@@ -46,27 +46,23 @@ export const login = async (email: string, password: string) => {
   }
   const userDto = generateUserDto(candidate)
   const tokens = await generateTokens(userDto)
-  await saveToken(userDto.userId, tokens.refreshToken)
+  await saveToken(candidate.id, candidate.refreshToken)
   return {
     ...tokens,
-    user: {
-      ...userDto,
-      image: candidate?.image ? await generateImageUrl(candidate.image) : null,
-    },
+    ...userDto,
+    image: candidate?.image ? await generateImageUrl(candidate.image) : null,
   }
 }
 
-// TODO next task
 const logout = async (refreshToken: string) => await removeToken(refreshToken)
 
-// TODO next task
-const refresh = async (refreshToken: string) => {
+export const refresh = async (refreshToken: string) => {
   if (!refreshToken) {
     throw ApiError.BadRequest('Unauthorized')
   }
-  const userData = await validateRefreshToken(refreshToken)
+  const isTokenValid = await validateRefreshToken(refreshToken)
   const tokenfromDB = await findToken(refreshToken)
-  if (!userData || !tokenfromDB) {
+  if (!isTokenValid || !tokenfromDB) {
     throw ApiError.BadRequest('Unauthorized')
   }
   const user = await prisma.users.findUnique({
@@ -79,6 +75,7 @@ const refresh = async (refreshToken: string) => {
   await saveToken(userDto.userId, tokens.refreshToken)
   return {
     ...tokens,
-    user: userDto,
+    ...userDto,
+    image: user?.image ? await generateImageUrl(user.image) : null,
   }
 }

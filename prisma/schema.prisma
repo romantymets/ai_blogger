@@ -28,8 +28,8 @@ model Users {
 
 model Accounts {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String @db.ObjectId
-  refresh_token String? @db.String
+  userId     String @db.ObjectId @unique
+  refresh_token String? @db.String @unique
   access_token String? @db.String
   expires_at Int?
 

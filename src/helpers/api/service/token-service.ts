@@ -39,7 +39,7 @@ export const validateRefreshToken = async (token: string) => {
 export const saveToken = async (userId: string, refreshToken: string) => {
   const tokenData = await prisma.accounts.findUnique({
     where: {
-      id: userId,
+      userId,
     },
   })
   if (tokenData) {
@@ -53,13 +53,14 @@ export const saveToken = async (userId: string, refreshToken: string) => {
       },
     })
     return tokenData
+  } else {
+    return await prisma.accounts.create({
+      data: {
+        refresh_token: refreshToken,
+        userId,
+      },
+    })
   }
-  return await prisma.accounts.create({
-    data: {
-      refresh_token: refreshToken,
-      userId,
-    },
-  })
 }
 
 export const removeToken = async (refreshToken: string) =>

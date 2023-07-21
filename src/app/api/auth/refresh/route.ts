@@ -1,22 +1,14 @@
 import { NextResponse } from 'next/server'
-import { login } from '@/helpers/api/service/auth-service'
+import { refresh } from '@/helpers/api/service/auth-service'
+import { ApiError } from '@/helpers/api/exceptions/api-error'
 
 /**
  * @swagger
- * /api/auth/login:
+ * /api/auth/refresh:
  *   post:
  *      tags: [authorization]
- *      summary: Login
- *      description: login user.
- *      requestBody:
- *        content:
- *          application/json:
- *            schema:
- *               email: string
- *               password: string
- *            example:
- *              email: test@test.com
- *              password: password123
+ *      summary: Refresh token
+ *      description: Refresh token
  *      responses:
  *        '200':
  *          description: OK
@@ -39,9 +31,15 @@ import { login } from '@/helpers/api/service/auth-service'
  */
 export async function POST(req: Request) {
   try {
-    const result = await req.json()
-    const { email, password } = result
-    const userData = await login(email, password)
+    const authorizationHeaders = req.headers.get('authorization')
+    if (!authorizationHeaders) {
+      throw new ApiError(401, 'Token is required')
+    }
+    const refreshToken = authorizationHeaders.split(' ')[1]
+    if (!refreshToken) {
+      throw new ApiError(401, 'Token is required')
+    }
+    const userData = await refresh(refreshToken)
     const response = new NextResponse(JSON.stringify(userData))
     response.cookies.set({
       name: 'refreshToken',
@@ -54,13 +52,12 @@ export async function POST(req: Request) {
     console.error('error ==>', error)
     return new NextResponse(
       JSON.stringify({
-        message: error.message || error.name,
+        message: error.message,
         name: error.name,
         errors: error.errors,
       }),
       {
         status: error.status || 500,
-        message: error.message || error.name,
         headers: { 'content-type': 'application/json' },
       } as any
     )

@@ -23,7 +23,7 @@ module.exports = cleanEnv(process.env, {
   REGION: str(),
   ACCESS_KEY: str(),
   SECRET_KEY: str(),
-
+  AWS_S3_BUCKET: str(),
   NODE_ENV: str({
     choices: ['development', 'production'],
     default: 'production',
