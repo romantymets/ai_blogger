@@ -4,9 +4,9 @@ import { generateImageUrl } from '@/helpers/api/aws'
 
 /**
  * @swagger
- * /api/user:
+ * /api/users:
  *   get:
- *      tags: [user]
+ *      tags: [users]
  *      summary: User list
  *      description: return users array
  *      responses:

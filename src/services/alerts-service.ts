@@ -44,7 +44,11 @@ const success = (message: string, options?: IAlertOptions) => {
 }
 
 const error = (message: string, options?: IAlertOptions) => {
-  alert({ ...options, type: AlertType.Error, message })
+  alert({
+    ...options,
+    type: AlertType.Error,
+    message: message || 'Something went wrong',
+  })
 }
 
 const info = (message: string, options?: IAlertOptions) => {

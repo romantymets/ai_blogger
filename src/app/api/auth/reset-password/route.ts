@@ -1,22 +1,22 @@
 import { NextResponse } from 'next/server'
-import { login } from '@/helpers/api/service/auth-service'
+import { resetPassword } from '@/helpers/api/service/auth-service'
 
 /**
  * @swagger
- * /api/auth/login:
+ * /api/auth/reset-password:
  *   post:
  *      tags: [authorization]
- *      summary: Login
- *      description: login user.
+ *      summary: Reset password
+ *      description: Reset password.
  *      requestBody:
  *        content:
  *          application/json:
  *            schema:
  *               email: string
- *               password: string
+ *               newPassword: string
  *            example:
  *              email: test@test.com
- *              password: password123
+ *              newPassword: password123
  *      responses:
  *        '200':
  *          description: OK
@@ -25,30 +25,18 @@ import { login } from '@/helpers/api/service/auth-service'
  *             schema:
  *               email: string
  *               userId: string
- *               image: string
- *               accessToken: string
- *               refreshToken: string
+ *               userName: string
  *             example:
  *               email: test@test.com
  *               userId: 123h
  *               userName: user
- *               image: some image
- *               accessToken: token
- *               refreshToken: token
  */
 export async function POST(req: Request) {
   try {
     const result = await req.json()
-    const { email, password } = result
-    const userData = await login(email, password)
-    const response = new NextResponse(JSON.stringify(userData))
-    response.cookies.set({
-      name: 'refreshToken',
-      value: userData.refreshToken,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    } as any)
-    return response
+    const { email, newPassword } = result
+    const userData = await resetPassword(email, newPassword)
+    return new NextResponse(JSON.stringify(userData))
   } catch (error) {
     console.error('error ==>', error)
     return new NextResponse(

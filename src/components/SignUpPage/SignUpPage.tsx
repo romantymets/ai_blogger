@@ -18,6 +18,7 @@ import BluButton from '@/components/UIComponents/Buttons/BluButton'
 
 import { SIGN_UP, LOG_IN } from '@/constants/navigationLinks'
 import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
+import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput'
 
 interface IDefaultValues {
   userName: string
@@ -130,10 +131,9 @@ const SignUpPage = () => {
                 })}
               />
 
-              <TextInput
+              <PasswordInput
                 id={'password'}
                 name={'password'}
-                type={'password'}
                 autoComplete={'password'}
                 label={'Password'}
                 error={Boolean(errors.password)}

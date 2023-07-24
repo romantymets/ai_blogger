@@ -40,6 +40,7 @@ const TextInput = ({
           id={id}
           name={name}
           type={type}
+          placeholder={label}
           autoComplete={autoComplete}
           required
           className={classNames(

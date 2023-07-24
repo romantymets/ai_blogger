@@ -2,7 +2,10 @@
 const appConfig = require('./config.ts')
 
 const nextConfig = {
-  reactStrictMode: true,
+  images: {
+    domains: ['localhost:3000', 'res.cloudinary.com', appConfig.AWS_S3_BUCKET],
+    minimumCacheTTL: 2628000,
+  },
   env: {
     DATABASE_URL: appConfig.DATABASE_URL,
     JWT_ACCESS_SECRET: appConfig.JWT_ACCESS_SECRET,

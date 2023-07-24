@@ -3,7 +3,7 @@ import { isAuthenticated } from '@/helpers/api/isAuthenticated'
 
 // Limit the middleware to paths starting with `/api/`
 export const config = {
-  matcher: ['/api/user/:path*', '/post/:path*'],
+  matcher: ['/api/users/:path*'],
 }
 
 export async function middleware(request: NextRequest) {

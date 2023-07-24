@@ -8,10 +8,10 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import sharp from 'sharp'
 
 const generateParams = (imageName: string) => {
-  const bucketName = process.env.BUCKET_NAME as string
   return {
-    Bucket: bucketName,
+    Bucket: process.env.BUCKET_NAME as string,
     Key: imageName,
+    ACL: 'public-read',
   }
 }
 
@@ -34,7 +34,7 @@ export async function uploadImageToS3(
 
   const params = {
     Bucket: process.env.BUCKET_NAME as string,
-    Key: `${Date.now()}-${fileName}`,
+    Key: fileName,
     Body: resizedImageBuffer,
     ContentType: fileExtension,
   }
@@ -48,7 +48,7 @@ export async function uploadImageToS3(
 export const generateImageUrl = async (imageName: string) => {
   const getObjectParams = generateParams(imageName)
   const command = new GetObjectCommand(getObjectParams)
-  const url = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
+  const url = await getSignedUrl(s3Client, command, { expiresIn: 9600 })
   return url
 }
 
