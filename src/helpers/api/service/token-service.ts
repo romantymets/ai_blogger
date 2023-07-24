@@ -44,9 +44,9 @@ export const saveToken = async (userId: string, refreshToken: string) => {
   })
   if (tokenData) {
     tokenData.refresh_token = refreshToken
-    await prisma.users.update({
+    await prisma.accounts.update({
       where: {
-        id: userId,
+        userId,
       },
       data: {
         refresh_token: refreshToken,

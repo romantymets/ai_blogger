@@ -20,3 +20,9 @@ export interface IUserValue {
   refreshToken: string
   image?: string | null
 }
+
+export interface UpdateUserCredential {
+  userName: string
+  aboutUser?: string
+  image?: string
+}

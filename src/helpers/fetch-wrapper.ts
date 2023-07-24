@@ -3,7 +3,7 @@ import { alertService } from '@/services/alerts-service'
 import { redirect } from 'next/navigation'
 import { LOG_IN } from '@/constants/navigationLinks'
 
-export const privateApi = ['api/users', 'api/post']
+export const privateApi = ['api/users', '/api/user']
 
 interface RequestOptions {
   method: string
@@ -24,7 +24,7 @@ export const fetchWrapper = {
 }
 
 function request(method: string) {
-  return async (url: string, body: any) => {
+  return async (url: string, body?: any) => {
     const requestOptions: RequestOptions = {
       method,
       headers: authHeader(url),
@@ -85,7 +85,7 @@ function authHeader(url: string) {
   if (isLoggedIn && isApiUrl) {
     return { Authorization: `Bearer ${user.accessToken}` }
   }
-  if (isLoggedIn && url.startsWith('api/auth/refresh')) {
+  if (isLoggedIn && url.startsWith('/api/auth/refresh')) {
     return { Authorization: `Bearer ${user.refreshToken}` }
   }
   return {}

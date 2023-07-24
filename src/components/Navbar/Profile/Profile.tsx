@@ -29,7 +29,15 @@ const Profile = () => {
     router.push(LOG_IN.href)
   }
 
-  const profile = user ? [EDIT_PROFILE, LOG_OUT] : [LOG_IN, SIGN_UP]
+  const profile = user
+    ? [
+        {
+          name: EDIT_PROFILE.name,
+          href: `${EDIT_PROFILE.href}/${user.userId}`,
+        },
+        LOG_OUT,
+      ]
+    : [LOG_IN, SIGN_UP]
 
   return (
     <Menu as="div" className="relative ml-3">
