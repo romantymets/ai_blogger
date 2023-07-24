@@ -11,20 +11,20 @@ import { uploadImageToS3 } from '@/helpers/api/aws'
  *      summary: Create new user
  *      description: Create new user.
  *      requestBody:
- *        content:
- *          application/json:
- *            schema:
+ *          content:
+ *            multipart/form-data:
+ *              schema:
  *               email: string
  *               password: string
  *               userName: string
  *               aboutUser?: string
  *               image?: file
- *            example:
- *              email: test@test.com
- *              password: password123
- *              userName: user
- *              aboutUser?: my name is user
- *              image?: some image
+ *              example:
+ *               email: test@test.com
+ *               password: password123
+ *               userName: user
+ *               aboutUser?: my name is user
+ *               image?: some image
  *      responses:
  *        '200':
  *          description: OK
@@ -32,7 +32,6 @@ import { uploadImageToS3 } from '@/helpers/api/aws'
  *            application/json:
  *             schema:
  *               email: string
- *               password: string
  *               userName: string
  *               aboutUser: string
  *               image: string
@@ -40,7 +39,6 @@ import { uploadImageToS3 } from '@/helpers/api/aws'
  *               refreshToken: string
  *             example:
  *               email: test@test.com
- *               password: password123
  *               userName: user
  *               aboutUser: my name is user
  *               image: some image
