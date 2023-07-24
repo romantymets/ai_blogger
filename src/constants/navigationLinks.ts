@@ -7,3 +7,8 @@ export const SIGN_UP = { name: 'Create Account', href: '/sign-up' }
 export const LOG_OUT = { name: 'Log Out', href: '/' }
 
 export const EDIT_PROFILE = { name: 'Edit Profile', href: '/edit-profile' }
+
+export const RESET_PASSWORD = {
+  name: 'Reset password',
+  href: '/reset-password',
+}
