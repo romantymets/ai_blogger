@@ -23,13 +23,20 @@ export const s3Client = new S3Client({
   },
 })
 
+interface SizeOption {
+  width: number
+  height: number
+}
+
 export async function uploadImageToS3(
   file: Buffer,
   fileName: string,
-  fileExtension: string
+  fileExtension: string,
+  size?: SizeOption
 ): Promise<string> {
+  const { width = 400, height = 500 } = size || {}
   const resizedImageBuffer = await sharp(file)
-    .resize(400, 500) // Specify your desired width or height for resizing
+    .resize(width, height) // Specify your desired width or height for resizing
     .toBuffer()
 
   const params = {
@@ -48,8 +55,7 @@ export async function uploadImageToS3(
 export const generateImageUrl = async (imageName: string) => {
   const getObjectParams = generateParams(imageName)
   const command = new GetObjectCommand(getObjectParams)
-  const url = await getSignedUrl(s3Client, command, { expiresIn: 9600 })
-  return url
+  return await getSignedUrl(s3Client, command, { expiresIn: 9600 })
 }
 
 export const deleteS3image = async (imageName: string) => {

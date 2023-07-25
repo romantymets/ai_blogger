@@ -18,6 +18,7 @@ module.exports = {
       ...colors,
       gallery: '#EFEFEFCC',
       royalBlue: '#3652E1',
+      natural200: '#E5E5E5',
     },
     extend: {
       backgroundImage: {

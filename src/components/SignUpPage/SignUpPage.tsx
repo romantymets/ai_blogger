@@ -1,24 +1,26 @@
 'use client'
-import { useState, ChangeEvent } from 'react'
+import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 
 import Link from 'next/link'
 import Image from 'next/image'
 
-import { PhotoIcon, UserCircleIcon } from '@heroicons/react/24/solid'
+import { UserCircleIcon } from '@heroicons/react/24/solid'
 
 import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
 import useToggle from '@/hooks/useToggle'
+import useImageUpload from '@/hooks/useImageUpload'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
+import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput'
+import UploadImage from '@/components/UIComponents/UploadImage/UploadImage'
 
 import { SIGN_UP, LOG_IN } from '@/constants/navigationLinks'
 import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
-import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput'
 
 interface IDefaultValues {
   userName: string
@@ -28,7 +30,16 @@ interface IDefaultValues {
 }
 
 const SignUpPage = () => {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null)
+  const {
+    imageUrl,
+    selectedImage,
+    handleImageUpload,
+    handleImageClear,
+    handleDrag,
+    handleDrop,
+    dragActive,
+  } = useImageUpload()
+
   const { open: loading, onOpen, onClose } = useToggle()
 
   const router = useRouter()
@@ -75,18 +86,6 @@ const SignUpPage = () => {
         onClose()
       })
   }
-
-  const handleImageUpload = (event: ChangeEvent<HTMLInputElement>) => {
-    if (event?.target?.files) {
-      setSelectedImage(event?.target?.files[0])
-    }
-  }
-
-  const handleImageClear = () => {
-    setSelectedImage(null)
-  }
-
-  const imageUrl = selectedImage ? URL.createObjectURL(selectedImage) : null
 
   return (
     <form className="my-8" onSubmit={handleSubmit(onSubmit)}>
@@ -201,41 +200,14 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            <div className="col-span-full">
-              <label
-                htmlFor="cover-photo"
-                className="block text-sm font-medium leading-6 text-gray-900"
-              >
-                Cover photo
-              </label>
-              <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                <div className="text-center">
-                  <PhotoIcon
-                    className="mx-auto h-12 w-12 text-gray-300"
-                    aria-hidden="true"
-                  />
-                  <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                    <label
-                      htmlFor="file-upload"
-                      className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                    >
-                      <span>Upload a file</span>
-                      <input
-                        id="file-upload"
-                        name="file-upload"
-                        type="file"
-                        className="sr-only"
-                        onChange={handleImageUpload}
-                      />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
-                  </div>
-                  <p className="text-xs leading-5 text-gray-600">
-                    PNG, JPG, GIF up to 10MB
-                  </p>
-                </div>
-              </div>
-            </div>
+            <UploadImage
+              handleImageUpload={handleImageUpload}
+              label={'Cover photo'}
+              image={imageUrl}
+              handleDrag={handleDrag}
+              handleDrop={handleDrop}
+              dragActive={dragActive}
+            />
           </div>
           <div className="mt-6 flex items-center justify-end gap-x-6">
             <BluButton

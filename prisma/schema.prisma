@@ -39,11 +39,11 @@ model Accounts {
 model Posts {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
   title     String
+  subtitle  String?
   content   String?
   image String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  published Boolean @default(false)
   author    Users @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String @db.ObjectId
   comments Comments[]

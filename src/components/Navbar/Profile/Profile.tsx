@@ -9,6 +9,7 @@ import { Menu, Transition } from '@headlessui/react'
 import { classNames } from '@/utils/classNames'
 
 import {
+  CREATE_POST,
   EDIT_PROFILE,
   LOG_IN,
   LOG_OUT,
@@ -35,6 +36,7 @@ const Profile = () => {
           name: EDIT_PROFILE.name,
           href: `${EDIT_PROFILE.href}/${user.userId}`,
         },
+        CREATE_POST,
         LOG_OUT,
       ]
     : [LOG_IN, SIGN_UP]
