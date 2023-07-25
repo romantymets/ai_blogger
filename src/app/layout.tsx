@@ -1,4 +1,4 @@
-import { Inter } from 'next/font/google'
+import { Lora } from 'next/font/google'
 
 import Footer from '@/components/Footer'
 
@@ -7,7 +7,7 @@ import './globals.css'
 import { classNames } from '@/utils/classNames'
 import Alert from '@/components/Alert'
 
-const inter = Inter({ subsets: ['latin'] })
+const lora = Lora({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'AI | Blogger',
@@ -22,7 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={classNames(inter.className, 'min-h-screen flex flex-col')}
+        className={classNames(lora.className, 'min-h-screen flex flex-col')}
       >
         <Navbar />
         <Alert />
