@@ -3,12 +3,15 @@ import defImage from 'public/postHero.jpg'
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline'
 import { Post } from '@/models/postsModel'
+import Link from 'next/link'
+import { AUTHOR } from '@/constants/navigationLinks'
 
 const SearchCard = ({
   image,
   author,
   comments,
   id,
+  authorId,
   content,
   title,
   createdAt,
@@ -26,7 +29,10 @@ const SearchCard = ({
       </div>
       <div className={'px-3'}>
         <div className={'flex justify-between items-center'}>
-          <div className="flex items-center">
+          <Link
+            className="flex items-center"
+            href={`${AUTHOR.href}/${authorId}`}
+          >
             {!author?.image ? (
               <UserCircleIcon
                 className="h-[32px] w-[32px] text-stone-600"
@@ -52,7 +58,7 @@ const SearchCard = ({
                 <ChatBubbleLeftEllipsisIcon className="h-[14px] w-[18px]" />
               </div>
             </div>
-          </div>
+          </Link>
           <p className={'mb-1 text-paleSky text-xs'}>
             {new Date(createdAt).toDateString()}
           </p>

@@ -3,6 +3,8 @@ import defImage from 'public/postHero.jpg'
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline'
 import { Post } from '@/models/postsModel'
+import Link from 'next/link'
+import { AUTHOR } from '@/constants/navigationLinks'
 
 const PostCard = ({
   title,
@@ -11,6 +13,7 @@ const PostCard = ({
   createdAt,
   comments,
   content,
+  authorId,
 }: Post) => {
   return (
     <div className="max-w-[320px] bg-white border border-gray-200 rounded-lg shadow cursor-pointer">
@@ -35,7 +38,10 @@ const PostCard = ({
         </p>
         <div className="w-full h-[1px] bg-natural200"></div>
         <div className="mt-5">
-          <div className="flex items-center">
+          <Link
+            href={`${AUTHOR.href}/${authorId}`}
+            className="flex items-center"
+          >
             {!author?.image ? (
               <UserCircleIcon
                 className="h-[50px] w-[50px] text-stone-600"
@@ -61,7 +67,7 @@ const PostCard = ({
                 <ChatBubbleLeftEllipsisIcon className="h-[14px] w-[18px]" />
               </div>
             </div>
-          </div>
+          </Link>
         </div>
       </div>
     </div>

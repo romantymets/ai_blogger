@@ -11,6 +11,7 @@ export interface Post {
   subtitle?: string
   image?: string | null
   author: PostAuthor
+  authorId: string
   createdAt: Date
   comments: any[]
 }
