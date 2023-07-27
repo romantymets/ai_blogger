@@ -161,7 +161,6 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
                   name={'userName'}
                   type={'text'}
                   label={'User Name'}
-                  autoComplete={'userName'}
                   error={Boolean(errors.userName)}
                   helperText={errors.userName?.message}
                   register={register('userName', {

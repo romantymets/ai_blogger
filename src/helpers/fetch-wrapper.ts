@@ -2,8 +2,9 @@ import { baseAuthUrl, saveUser, userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 import { redirect } from 'next/navigation'
 import { LOG_IN } from '@/constants/navigationLinks'
+import { ApiError } from '@/helpers/api/exceptions/api-error'
 
-export const privateApi = ['api/users', '/api/posts']
+export const privateApi = ['/api/users', '/api/posts']
 
 interface RequestOptions {
   method: string
@@ -54,9 +55,8 @@ function request(method: string) {
           })
           if (!refreshRes.ok) {
             const refreshErrorData = await refreshRes.json()
-            const error =
-              (response && refreshErrorData?.message) || response.statusText
-            return Promise.reject(new Error(error))
+            console.error(refreshErrorData)
+            throw ApiError.UnauthorizedError()
           }
           if (refreshRes.ok) {
             const userData = await refreshRes.json()

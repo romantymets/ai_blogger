@@ -19,6 +19,8 @@ module.exports = {
       gallery: '#EFEFEFCC',
       royalBlue: '#3652E1',
       natural200: '#E5E5E5',
+      trout: '#495057',
+      paleSky: '#6C757D',
     },
     extend: {
       backgroundImage: {
