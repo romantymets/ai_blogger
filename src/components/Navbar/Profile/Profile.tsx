@@ -1,5 +1,5 @@
 'use client'
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -22,8 +22,26 @@ import { userService } from '@/services/user.service'
 import { useRouter } from 'next/navigation'
 
 const Profile = () => {
+  const [userImage, setUserImage] = useState<string | null>(null)
   const { user } = useGetUser()
   const router = useRouter()
+
+  useEffect(() => {
+    if (user?.userId) {
+      userService
+        .getUserById(user.userId)
+        .then(({ data }) => {
+          if (data?.image) {
+            setUserImage(data.image)
+          }
+        })
+        .catch((error) => {
+          console.error(error)
+        })
+    } else {
+      setUserImage(null)
+    }
+  }, [user?.userId])
 
   const handleLogOut = () => {
     userService.logout()
@@ -45,16 +63,16 @@ const Profile = () => {
     <Menu as="div" className="relative ml-3">
       <div>
         <Menu.Button className="flex rounded-full border-solid border-2 border-text-stone-400 text-md focus:outline-none flex items-center px-1">
-          {!user ? (
+          {!userImage ? (
             <UserCircleIcon
               className="h-8 w-8 text-stone-600"
               aria-hidden="true"
             />
           ) : (
             <Fragment>
-              {user?.image ? (
+              {userImage ? (
                 <Image
-                  src={user.image}
+                  src={userImage}
                   width={24}
                   height={24}
                   style={{

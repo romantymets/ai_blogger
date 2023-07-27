@@ -1,9 +1,25 @@
 import prisma from '@/libs/prisma'
-
 import { ApiError } from '@/helpers/api/exceptions/api-error'
-import { deleteS3image } from '@/helpers/api/aws'
+import { deleteS3image, generateImageUrl } from '@/helpers/api/aws'
 import { CreatePostCredential } from '@/models/postsServiceModel'
 import { findUserById } from '@/helpers/api/service/user-service'
+import { Post } from '@/models/postsModel'
+
+const generatePostsResponse = async (posts: Post[]) => {
+  for (const post of posts) {
+    if (post?.image) {
+      post.image = await generateImageUrl(post.image)
+    }
+    post.author = {
+      userName: post.author.userName,
+      id: post.author.id,
+      image: post.author?.image
+        ? await generateImageUrl(post.author.image)
+        : null,
+    }
+  }
+  return posts
+}
 
 export const findPostById = async (id: string) => {
   if (!id) {
@@ -62,11 +78,15 @@ export const deletePost = async (id: string) => {
   })
 }
 
-export const getAllPosts = async () =>
-  await prisma.posts.findMany({
-    include: {
-      author: true,
-      comments: true,
-    },
-    orderBy: [{ createdAt: 'desc' }],
-  })
+export const getAllPosts = async (query: any) => {
+  try {
+    const total = await prisma.posts.count()
+    const posts = await prisma.posts.findMany(query)
+
+    const newPosts = await generatePostsResponse(posts)
+
+    return { total, posts: newPosts }
+  } catch (error) {
+    throw new ApiError(error.status || 500, error.message)
+  }
+}

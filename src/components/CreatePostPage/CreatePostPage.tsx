@@ -111,7 +111,7 @@ const CreatePostPage = () => {
       </Hero>
       <Fragment>
         <form
-          className="my-8 w-full max-w-2xl"
+          className="my-8 w-full max-w-2xl px-3"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="space-y-12">
@@ -123,7 +123,6 @@ const CreatePostPage = () => {
                     name={'title'}
                     type={'text'}
                     label={'Title'}
-                    autoComplete={'title'}
                     error={Boolean(errors.title)}
                     helperText={errors.title?.message}
                     register={register('title', {
@@ -138,8 +137,9 @@ const CreatePostPage = () => {
                     name={'subtitle'}
                     type={'text'}
                     label={'Subtitle'}
-                    autoComplete={'subtitle'}
-                    register={register('subtitle')}
+                    register={register('subtitle', {
+                      required: false,
+                    })}
                   />
                 </div>
 
