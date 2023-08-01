@@ -58,12 +58,12 @@ const logout = async (refreshToken: string) => await removeToken(refreshToken)
 
 export const refresh = async (refreshToken: string) => {
   if (!refreshToken) {
-    throw ApiError.BadRequest('Unauthorized')
+    throw ApiError.BadRequest('Token not found')
   }
   const isTokenValid = await validateRefreshToken(refreshToken)
   const tokenfromDB = await findToken(refreshToken)
   if (!isTokenValid || !tokenfromDB) {
-    throw ApiError.BadRequest('Unauthorized')
+    throw ApiError.BadRequest('Token not valid')
   }
   const user = await prisma.users.findUnique({
     where: {

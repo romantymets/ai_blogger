@@ -8,8 +8,8 @@ const create = async (post: FormData) =>
 const getPostById = async (id: string) =>
   await fetchWrapper.get(`${basePostsUrl}/${id}`)
 
-const updatePost = async (id: string, userData: FormData) =>
-  await fetchWrapper.put(`${basePostsUrl}/${id}`, userData)
+const updatePost = async (id: string, postData: FormData) =>
+  await fetchWrapper.put(`${basePostsUrl}/${id}`, postData)
 
 const deletePost = async (id: string) =>
   await fetchWrapper.delete(`${basePostsUrl}/${id}`)

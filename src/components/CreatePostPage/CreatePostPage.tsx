@@ -27,7 +27,7 @@ import HeroContent from '@/components/CreatePostPage/HeroContent'
 interface IDefaultValues {
   title: string
   content: string
-  subtitle?: string
+  subtitle: string
 }
 
 const CreatePostPage = () => {
@@ -106,7 +106,7 @@ const CreatePostPage = () => {
         <HeroContent
           title={title}
           subtitle={subtitle}
-          userName={user?.userName}
+          userName={user?.userName as string}
         />
       </Hero>
       <Fragment>

@@ -9,7 +9,15 @@ interface IAuthorProps {
   searchParams: { page?: number }
 }
 
-export const revalidate = 60
+export const revalidate = 10
+
+export async function generateMetadata({ params }) {
+  const user = await getUserById(params.id)
+  return {
+    title: user?.userName || 'Author',
+    description: user?.aboutUser,
+  }
+}
 
 const Author = async ({ params, searchParams }: IAuthorProps) => {
   const { page } = searchParams

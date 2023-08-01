@@ -4,7 +4,8 @@ import { getAllPosts } from '@/helpers/api/service/post-service'
 import { generateSearchQuery } from '@/utils/generateSearchQuery'
 import { generatePostListQuery } from '@/utils/generatePostListQuery'
 
-export const revalidate = 60
+export const revalidate = 5
+export const dynamic = 'force-dynamic'
 
 const Home = async ({ searchParams }) => {
   const { page, search } = searchParams

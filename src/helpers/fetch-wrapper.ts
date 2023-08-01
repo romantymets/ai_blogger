@@ -1,10 +1,10 @@
 import { baseAuthUrl, saveUser, userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
-import { redirect } from 'next/navigation'
 import { LOG_IN } from '@/constants/navigationLinks'
 import { ApiError } from '@/helpers/api/exceptions/api-error'
+import Router from 'next/router'
 
-export const privateApi = ['/api/users', '/api/posts']
+export const privateApi = ['/api/users', '/api/posts', '/api/comments']
 
 interface RequestOptions {
   method: string
@@ -25,10 +25,11 @@ export const fetchWrapper = {
 }
 
 function request(method: string) {
-  return async (url: string, body?: any) => {
+  return async (url: string, body?: any, fetchOptions?: any) => {
     const requestOptions: RequestOptions = {
       method,
       headers: authHeader(url),
+      ...fetchOptions,
     }
     if (body) {
       if (body instanceof FormData) {
@@ -66,7 +67,7 @@ function request(method: string) {
         } catch (error) {
           userService.logout()
           alertService.error('Unauthorized')
-          redirect(LOG_IN.href)
+          await Router.push(LOG_IN.href)
         }
       } else {
         const error = (response && errorData?.message) || response.statusText
