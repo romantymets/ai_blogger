@@ -10,6 +10,8 @@ export const EDIT_PROFILE = { name: 'Edit Profile', href: '/edit-profile' }
 
 export const CREATE_POST = { name: 'Create Post', href: '/posts' }
 
+export const AUTHOR = { name: 'Author', href: '/author' }
+
 export const RESET_PASSWORD = {
   name: 'Reset password',
   href: '/reset-password',

@@ -78,9 +78,9 @@ export const deletePost = async (id: string) => {
   })
 }
 
-export const getAllPosts = async (query: any) => {
+export const getAllPosts = async (query: any, countQuery = {}) => {
   try {
-    const total = await prisma.posts.count()
+    const total = await prisma.posts.count(countQuery)
     const posts = await prisma.posts.findMany(query)
 
     const newPosts = await generatePostsResponse(posts)
