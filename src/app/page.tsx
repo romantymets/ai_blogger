@@ -8,9 +8,9 @@ export const revalidate = 5
 export const dynamic = 'force-dynamic'
 
 const Home = async ({ searchParams }) => {
-  const { page, search } = searchParams
+  const { page, search, sortOrder } = searchParams
 
-  const postsListQuery = generatePostListQuery(page)
+  const postsListQuery = generatePostListQuery(page, sortOrder)
 
   let searchData
 
@@ -29,6 +29,7 @@ const Home = async ({ searchParams }) => {
         total={total}
         page={page}
         searchData={searchData}
+        sortOrder={sortOrder}
       />
     </Fragment>
   )

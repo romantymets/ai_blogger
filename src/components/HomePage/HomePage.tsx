@@ -5,15 +5,17 @@ import Pagination from '@/components/UIComponents/Pagination'
 import { HOME } from '@/constants/navigationLinks'
 import Search from '@/components/HomePage/Search'
 import { Post } from '@/models/postsModel'
+import SortsLit from '@/components/HomePage/SortsList/SortsLit'
 
 interface HomeProps {
   posts?: Post[]
   searchData?: Post[]
   total: number
   page?: number
+  sortOrder?: string
 }
 
-const HomePage = ({ posts, total, page, searchData }: HomeProps) => {
+const HomePage = ({ posts, total, page, searchData, sortOrder }: HomeProps) => {
   return (
     <section>
       <Hero>
@@ -26,6 +28,7 @@ const HomePage = ({ posts, total, page, searchData }: HomeProps) => {
           }
         >
           <Search searchData={searchData} />
+          <SortsLit href={HOME.href} currentOrder={sortOrder} />
           <PostsList posts={posts} />
           <Pagination
             total={total}
