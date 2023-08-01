@@ -6,6 +6,7 @@ import { UserDto } from '@/models/userServiceModel'
 export const generateTokens = async (payload: UserDto) => {
   const iat = Math.floor(Date.now() / 1000)
   const exp = iat + 60 * 60 * 24 // one day
+  const refreshExp = iat + 60 * 60 * 24 * 30
 
   const accessToken = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
@@ -16,9 +17,9 @@ export const generateTokens = async (payload: UserDto) => {
 
   const refreshToken = await new SignJWT({ ...payload })
     .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-    .setExpirationTime(exp)
-    .setIssuedAt(iat * 30)
-    .setNotBefore(iat * 30)
+    .setExpirationTime(refreshExp)
+    .setIssuedAt(iat)
+    .setNotBefore(iat)
     .sign(new TextEncoder().encode(process.env.JWT_REFRESH_SECRET as string))
 
   return { accessToken, refreshToken }
@@ -28,7 +29,7 @@ export const validateRefreshToken = async (token: string) => {
   try {
     const { payload } = await jwtVerify(
       token,
-      new TextEncoder().encode(process.env.JWT_REFRESH_SECRE as string)
+      new TextEncoder().encode(process.env.JWT_REFRESH_SECRET as string)
     )
     return payload
   } catch (e) {

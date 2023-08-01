@@ -51,6 +51,20 @@ export const createUser = async (payload: CreateUserCredential) => {
 export const deleteUser = async (id: string) => {
   const user = await findUserById(id)
 
+  const posts = await prisma.posts.findMany({
+    where: {
+      authorId: id,
+    },
+  })
+
+  if (posts) {
+    for (const post of posts) {
+      if (post?.image) {
+        post.image = await deleteS3image(post.image)
+      }
+    }
+  }
+
   if (user?.image) {
     await deleteS3image(user.image)
   }

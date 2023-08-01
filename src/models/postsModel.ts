@@ -15,3 +15,13 @@ export interface Post {
   createdAt: Date
   comments: any[]
 }
+
+export interface RecentPost {
+  id: string
+  title: string
+  content: string
+  subtitle?: string
+  image?: string | null
+  authorId: string
+  createdAt: Date
+}

@@ -29,12 +29,27 @@ export const findPostById = async (id: string) => {
     where: {
       id,
     },
+    include: {
+      author: true,
+      comments: true,
+    },
   })
 
   if (!post) {
     throw new ApiError(500, 'Post not found')
   }
-  return post
+
+  return {
+    ...post,
+    image: post?.image ? await generateImageUrl(post.image) : null,
+    author: {
+      userName: post.author.userName,
+      id: post.author.id,
+      image: post?.author?.image
+        ? await generateImageUrl(post.author.image)
+        : null,
+    },
+  }
 }
 
 export const createPost = async ({
@@ -88,5 +103,74 @@ export const getAllPosts = async (query: any, countQuery = {}) => {
     return { total, posts: newPosts }
   } catch (error) {
     throw new ApiError(error.status || 500, error.message)
+  }
+}
+
+export const getResentPosts = async (id: string) => {
+  try {
+    const posts = await prisma.posts.findMany({
+      where: {
+        NOT: {
+          id,
+        },
+      },
+      take: 4,
+      orderBy: [{ createdAt: 'desc' }],
+    })
+
+    for (const post of posts) {
+      if (post?.image) {
+        post.image = await generateImageUrl(post.image)
+      }
+    }
+
+    return posts
+  } catch (error) {
+    throw new ApiError(error.status || 500, error.message)
+  }
+}
+
+export const updatePost = async (postData: CreatePostCredential) => {
+  const post = await findPostById(postData.id)
+
+  if (postData?.image) {
+    if (post?.image !== postData?.image) {
+      if (post?.image) {
+        await deleteS3image(post.image)
+      }
+    }
+  }
+
+  const updatedPost = await prisma.posts.update({
+    where: {
+      id: postData.id,
+    },
+    include: {
+      author: true,
+    },
+    data: {
+      title: postData.title,
+      subtitle: postData.subtitle,
+      content: postData.content,
+      ...(postData?.image && { image: postData.image }),
+    },
+  })
+
+  if (!updatedPost) {
+    throw new ApiError(500, 'Post not found')
+  }
+
+  return {
+    ...updatedPost,
+    image: updatedPost?.image
+      ? await generateImageUrl(updatedPost.image)
+      : null,
+    author: {
+      userName: updatedPost?.author?.userName,
+      id: updatedPost?.author?.id,
+      image: updatedPost?.author?.image
+        ? await generateImageUrl(updatedPost.author.image)
+        : null,
+    },
   }
 }

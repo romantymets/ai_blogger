@@ -3,9 +3,9 @@ import { POST_LIMIT } from '@/constants/pagination'
 
 interface IPagination {
   page?: number
-  total: number
+  total?: number
   href: string
-  postsLength: number
+  postsLength?: number
 }
 
 const btnClassName =

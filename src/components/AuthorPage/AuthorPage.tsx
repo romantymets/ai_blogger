@@ -10,8 +10,8 @@ import { Post } from '@/models/postsModel'
 import { Author } from '@/models/userModel'
 
 interface AuthorProps {
-  posts?: Post[]
-  author?: Author
+  posts: Post[]
+  author: Author
   total: number
   page?: number
 }

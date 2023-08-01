@@ -41,7 +41,7 @@ const Profile = () => {
     } else {
       setUserImage(null)
     }
-  }, [user?.userId])
+  }, [user])
 
   const handleLogOut = () => {
     userService.logout()

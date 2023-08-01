@@ -23,7 +23,7 @@ const SearchResultList = ({ data, isLoading, open }: ISearchResProps) => {
                 {data?.length ? (
                   <div
                     className={
-                      'flex flex-col gap-2 max-h-[380px] overflow-auto'
+                      'flex flex-col gap-2 max-h-[380px] overflow-auto pb-3'
                     }
                   >
                     {data.map((post) => (

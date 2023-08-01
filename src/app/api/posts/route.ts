@@ -35,11 +35,13 @@ import { createPost } from '@/helpers/api/service/post-service'
  *               content: string
  *               authorId: string
  *               image: string
+ *               author: object
  *             example:
  *               title: article title
  *               content: user article
  *               image: some image
  *               authorId: ssdd89
+ *               author: {id: 122, userName: ro, image: image || null}
  */
 export async function POST(request: NextRequest) {
   try {

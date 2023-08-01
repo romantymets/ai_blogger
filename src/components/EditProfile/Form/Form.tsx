@@ -24,7 +24,7 @@ import { IEditUserData } from '@/components/EditProfile/EditProfileComponent'
 interface IDefaultValues {
   userName: string
   aboutUser: string
-  image?: string
+  image: string
 }
 
 const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
@@ -115,9 +115,9 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
   useEffect(() => {
     if (data) {
       setValue('userName', data.userName)
-      setValue('aboutUser', data.aboutUser)
+      setValue('aboutUser', data.aboutUser || '')
       if (data?.image) {
-        setValue('image', data.image)
+        setValue('image', data.image as string)
       }
     }
   }, [data, setValue])
@@ -144,7 +144,7 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
                   alt={'image'}
                   width={80}
                   height={80}
-                  className={'rounded-full w-20 h-20'}
+                  className={'rounded-full w-20 h-20 object-cover'}
                 />
               ) : (
                 <UserCircleIcon

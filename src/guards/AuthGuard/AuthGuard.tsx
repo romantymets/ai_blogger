@@ -12,7 +12,7 @@ const AuthGuard = ({ children }: { children: React.ReactNode }) => {
     if (!userService.userValue) {
       router.push(LOG_IN.href)
     }
-  }, [])
+  }, [router])
 
   return <Fragment>{children}</Fragment>
 }

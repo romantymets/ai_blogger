@@ -7,7 +7,7 @@ interface UploadImageProps {
   handleDrop: (e: DragEvent<HTMLDivElement>) => void
   dragActive: boolean
   label?: string
-  image?: string
+  image?: string | null
   handleImageClear?: () => void
 }
 
