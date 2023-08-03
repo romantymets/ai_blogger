@@ -1,6 +1,6 @@
-import { Users } from 'prisma/prisma-client'
+import { User } from 'prisma/prisma-client'
 
-export const generateTokensDto = async (user: Users) => {
+export const generateTokensDto = async (user: User) => {
   return {
     email: user.email,
     userId: user.id,

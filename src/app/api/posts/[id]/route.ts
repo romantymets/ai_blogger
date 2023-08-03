@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { deletePost, updatePost } from '@/helpers/api/service/post-service'
-import { uploadImageToS3 } from '@/helpers/api/aws'
-import { v4 as uuid } from 'uuid'
+import { saveS3Image } from '@/helpers/api/aws'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
 
 /**
  * @swagger
@@ -32,19 +32,7 @@ export async function DELETE(
     const post = await deletePost(params.id)
     return new NextResponse(JSON.stringify(post))
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }
 
@@ -101,17 +89,10 @@ export async function PUT(
     const subtitle = formData.get('subtitle') as string | ''
     const content = formData.get('content') as string | ''
 
-    let fileName
-    if (image) {
-      const mimeType = image.type
-      const fileExtension = mimeType.split('/')[1]
-
-      const buffer = Buffer.from(await image.arrayBuffer())
-      fileName = await uploadImageToS3(buffer, uuid(), fileExtension, {
-        width: 1440,
-        height: 800,
-      })
-    }
+    const fileName = await saveS3Image(image, {
+      width: 1440,
+      height: 800,
+    })
 
     const postData = await updatePost({
       id: params.id,
@@ -122,18 +103,6 @@ export async function PUT(
     })
     return new NextResponse(JSON.stringify(postData))
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

@@ -20,7 +20,6 @@ import { generateImageUrl } from '@/helpers/api/aws'
  *                 userName: string
  *                 image: string
  *                 aboutUser: string
- *                 hashedPassword: string
  *                 createdAt: string
  *                 updatedAt: string
  *                 favoriteIds: array
@@ -33,7 +32,6 @@ import { generateImageUrl } from '@/helpers/api/aws'
  *                 userName: test
  *                 image: http//image
  *                 aboutUser: about user
- *                 hashedPassword: 123d
  *                 createdAt: registration date
  *                 updatedAt: edit user date
  *                 favoriteIds: []

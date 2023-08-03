@@ -3,7 +3,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  previewFeatures = ["fieldReference"]
 }
 
 datasource db {
@@ -12,32 +11,21 @@ datasource db {
 }
 
 
-model Users {
+model User {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
   email String  @unique
   userName  String
   image String?
   aboutUser String?
-  hashedPassword String
+  password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  favoriteIds String[] @db.ObjectId
-  posts Posts[]
-  account Accounts[]
-  comments Comments[]
+  posts Post[]
+  comments Comment[]
 }
 
-model Accounts {
-  id  String @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String @db.ObjectId @unique
-  refresh_token String? @db.String @unique
-  access_token String? @db.String
-  expires_at Int?
 
-  user Users @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Posts {
+model Post {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
   title     String
   subtitle  String?
@@ -45,22 +33,22 @@ model Posts {
   image String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  author    Users @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String @db.ObjectId
-  comments Comments[]
+  comments Comment[]
 }
 
 
-model Comments {
+model Comment {
   id  String @id @default(auto()) @map("_id") @db.ObjectId
   content   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  author    Users @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author    User @relation(fields: [authorId], references: [id], onDelete: Cascade)
   authorId  String @db.ObjectId
 
-  post    Posts @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post    Post @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId  String @db.ObjectId
 }
 

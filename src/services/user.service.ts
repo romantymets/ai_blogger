@@ -1,6 +1,8 @@
 import { fetchWrapper } from '@/helpers/fetch-wrapper'
 import { BehaviorSubject } from 'rxjs'
 import { IUserValue } from '@/models/userServiceModel'
+import { ResetPasswordCredential } from '@/helpers/validationSchema/resetPasswordValidationSchema'
+import { LoginCredential } from '@/helpers/validationSchema/loginValidationSchema'
 
 export const baseAuthUrl = '/api/auth'
 export const baseUsersUrl = '/api/users'
@@ -18,19 +20,13 @@ const register = async (user: FormData) => {
   return await fetchWrapper.post(`${baseAuthUrl}/registration`, user)
 }
 
-const login = async (email: string, password: string) => {
-  const userRes = await fetchWrapper.post(`${baseAuthUrl}/login`, {
-    email,
-    password,
-  })
+const login = async (data: LoginCredential) => {
+  const userRes = await fetchWrapper.post(`${baseAuthUrl}/login`, data)
   saveUser(userRes)
 }
 
-const resetPassword = async (email: string, newPassword: string) => {
-  return await fetchWrapper.post(`${baseAuthUrl}/reset-password`, {
-    email,
-    newPassword,
-  })
+const resetPassword = async (data: ResetPasswordCredential) => {
+  return await fetchWrapper.post(`${baseAuthUrl}/reset-password`, data)
 }
 
 const logout = () => {

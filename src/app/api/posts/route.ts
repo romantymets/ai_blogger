@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { v4 as uuid } from 'uuid'
-import { uploadImageToS3 } from '@/helpers/api/aws'
+import { NextRequest } from 'next/server'
+
+import { saveS3Image } from '@/helpers/api/aws'
 import { createPost } from '@/helpers/api/service/post-service'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { generateResponse } from '@/utils/generateResponse'
 
 /**
  * @swagger
@@ -51,17 +53,11 @@ export async function POST(request: NextRequest) {
     const subtitle = formData.get('subtitle') as string | ''
     const userId = formData.get('userId') as string | ''
     const content = formData.get('content') as string | ''
-    let fileName
-    if (image) {
-      const mimeType = image.type
-      const fileExtension = mimeType.split('/')[1]
 
-      const buffer = Buffer.from(await image.arrayBuffer())
-      fileName = await uploadImageToS3(buffer, uuid(), fileExtension, {
-        width: 1440,
-        height: 800,
-      })
-    }
+    const fileName = await saveS3Image(image, {
+      width: 1440,
+      height: 800,
+    })
 
     const postData = await createPost({
       id: userId,
@@ -70,20 +66,8 @@ export async function POST(request: NextRequest) {
       subtitle,
       ...(fileName && { image: fileName }),
     })
-    return new NextResponse(JSON.stringify(postData))
+    return generateResponse(postData)
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

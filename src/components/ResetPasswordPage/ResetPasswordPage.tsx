@@ -15,22 +15,21 @@ import {
   RESET_PASSWORD,
   SIGN_UP,
 } from '@/constants/navigationLinks'
-import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
 import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput/PasswordInput'
-
-interface IDefaultValues {
-  email: string
-  password: string
-  confirmPassword: string
-}
+import { yupResolver } from '@hookform/resolvers/yup'
+import {
+  ResetPasswordCredential,
+  resetPasswordValidationSchema,
+} from '@/helpers/validationSchema/resetPasswordValidationSchema'
 
 const ResetPasswordPage = () => {
   const router = useRouter()
   const { open: loading, onOpen, onClose } = useToggle()
-  const defaultValues: IDefaultValues = {
+
+  const defaultValues = {
     email: '',
     password: '',
     confirmPassword: '',
@@ -39,17 +38,17 @@ const ResetPasswordPage = () => {
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
   } = useForm({
-    defaultValues,
     mode: 'onBlur',
+    resolver: yupResolver(resetPasswordValidationSchema),
+    defaultValues,
   })
 
-  const onSubmit = ({ email, password }: IDefaultValues) => {
+  const onSubmit = (data: ResetPasswordCredential) => {
     onOpen()
     return userService
-      .resetPassword(email, password)
+      .resetPassword(data)
       .then((result) => {
         const currentUser = userService.userValue
         alertService.success('Password successful updated')
@@ -67,8 +66,6 @@ const ResetPasswordPage = () => {
         onClose()
       })
   }
-
-  const [password] = watch(['password'])
 
   return (
     <Fragment>
@@ -88,14 +85,8 @@ const ResetPasswordPage = () => {
               autoComplete={'email'}
               label={'Email address'}
               error={Boolean(errors.email)}
-              helperText={errors.email?.message}
-              register={register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: EmailRegExp,
-                  message: 'Email not correct',
-                },
-              })}
+              helperText={errors.email?.message as string}
+              register={register('email')}
             />
 
             <PasswordInput
@@ -104,15 +95,8 @@ const ResetPasswordPage = () => {
               autoComplete={'password'}
               label={'Password'}
               error={Boolean(errors.password)}
-              helperText={errors.password?.message}
-              register={register('password', {
-                required: 'Password is required',
-                pattern: {
-                  value: PasswordRegExp,
-                  message:
-                    'Minimum eight characters, at least one letter and one number',
-                },
-              })}
+              helperText={errors.password?.message as string}
+              register={register('password')}
             />
 
             <PasswordInput
@@ -121,17 +105,8 @@ const ResetPasswordPage = () => {
               autoComplete={'password'}
               label={'Confirm password'}
               error={Boolean(errors.confirmPassword)}
-              helperText={errors.confirmPassword?.message}
-              register={register('confirmPassword', {
-                required: 'Confirm password is required',
-                pattern: {
-                  value: PasswordRegExp,
-                  message:
-                    'Minimum eight characters, at least one letter and one number',
-                },
-                validate: (value: string) =>
-                  value === password || 'Passwords do not match',
-              })}
+              helperText={errors.confirmPassword?.message as string}
+              register={register('confirmPassword')}
             />
 
             <div>

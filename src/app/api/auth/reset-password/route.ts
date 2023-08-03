@@ -1,5 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { resetPassword } from '@/helpers/api/service/auth-service'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { generateResponse } from '@/utils/generateResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { loginValidationSchema } from '@/helpers/validationSchema/loginValidationSchema'
 
 /**
  * @swagger
@@ -13,10 +17,12 @@ import { resetPassword } from '@/helpers/api/service/auth-service'
  *          application/json:
  *            schema:
  *               email: string
- *               newPassword: string
+ *               password: string
+ *               confirmPassword: string
  *            example:
  *              email: test@test.com
- *              newPassword: password123
+ *              password: password123
+ *              confirmPassword: password123
  *      responses:
  *        '200':
  *          description: OK
@@ -31,25 +37,29 @@ import { resetPassword } from '@/helpers/api/service/auth-service'
  *               userId: 123h
  *               userName: user
  */
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const result = await req.json()
-    const { email, newPassword } = result
-    const userData = await resetPassword(email, newPassword)
-    return new NextResponse(JSON.stringify(userData))
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, loginValidationSchema)
+
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
+      })
+    }
+
+    const { email, password } = data
+
+    const userData = await resetPassword(email, password)
+
+    return generateResponse(userData)
   } catch (error) {
-    console.error('error ==>', error)
-    return new NextResponse(
-      JSON.stringify({
-        message: error.message || error.name,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        message: error.message || error.name,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

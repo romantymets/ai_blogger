@@ -10,21 +10,21 @@ import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
 import { HOME, SIGN_UP, RESET_PASSWORD } from '@/constants/navigationLinks'
-import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
 import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput/PasswordInput'
-
-interface IDefaultValues {
-  email: string
-  password: string
-}
+import { yupResolver } from '@hookform/resolvers/yup'
+import {
+  LoginCredential,
+  loginValidationSchema,
+} from '@/helpers/validationSchema/loginValidationSchema'
 
 const LoginPage = () => {
   const router = useRouter()
   const { open: loading, onOpen, onClose } = useToggle()
-  const defaultValues: IDefaultValues = {
+
+  const defaultValues = {
     email: '',
     password: '',
   }
@@ -35,13 +35,14 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm({
     defaultValues,
+    resolver: yupResolver(loginValidationSchema),
     mode: 'onBlur',
   })
 
-  const onSubmit = ({ email, password }: IDefaultValues) => {
+  const onSubmit = (data: LoginCredential) => {
     onOpen()
     return userService
-      .login(email, password)
+      .login(data)
       .then(() => {
         alertService.success('Authorization successful')
         onClose()
@@ -72,14 +73,8 @@ const LoginPage = () => {
               autoComplete={'email'}
               label={'Email address'}
               error={Boolean(errors.email)}
-              helperText={errors.email?.message}
-              register={register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: EmailRegExp,
-                  message: 'Email not correct',
-                },
-              })}
+              helperText={errors.email?.message as string}
+              register={register('email')}
             />
 
             <PasswordInput
@@ -88,15 +83,8 @@ const LoginPage = () => {
               autoComplete={'password'}
               label={'Password'}
               error={Boolean(errors.password)}
-              helperText={errors.password?.message}
-              register={register('password', {
-                required: 'Password is required',
-                pattern: {
-                  value: PasswordRegExp,
-                  message:
-                    'Minimum eight characters, at least one letter and one number',
-                },
-              })}
+              helperText={errors.password?.message as string}
+              register={register('password')}
             />
 
             <p className="mt-10 text-right text-sm text-gray-500">

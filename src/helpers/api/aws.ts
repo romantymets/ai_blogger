@@ -6,6 +6,8 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import sharp from 'sharp'
+import { v4 as uuid } from 'uuid'
+import { ApiError } from '@/helpers/api/exceptions/api-error'
 
 const generateParams = (imageName: string) => {
   return {
@@ -18,8 +20,8 @@ const generateParams = (imageName: string) => {
 export const s3Client = new S3Client({
   region: process.env.REGION as string,
   credentials: {
-    accessKeyId: process.env.ACCESS_KEY as string,
-    secretAccessKey: process.env.SECRET_KEY as string,
+    accessKeyId: process.env.AWS_S3_ACCESS_KEY as string,
+    secretAccessKey: process.env.AWS_S3_SECRET_KEY as string,
   },
 })
 
@@ -62,4 +64,25 @@ export const deleteS3image = async (imageName: string) => {
   const getObjectParams = generateParams(imageName)
   const command = new DeleteObjectCommand(getObjectParams)
   await s3Client.send(command)
+}
+
+export const saveS3Image = async (
+  image: Blob | null,
+  imageSize?: SizeOption
+) => {
+  let fileName
+  if (image) {
+    const mimeType = image.type
+    const fileExtension = mimeType.split('/')[1]
+
+    const buffer = Buffer.from(await image.arrayBuffer())
+
+    try {
+      fileName = await uploadImageToS3(buffer, uuid(), fileExtension, imageSize)
+    } catch (e) {
+      throw new ApiError(500, 'Something went wrong with image save')
+    }
+  }
+
+  return fileName
 }

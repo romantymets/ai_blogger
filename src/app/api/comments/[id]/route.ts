@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { deleteComment } from '@/helpers/api/service/comment-service'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
 
 /**
  * @swagger
@@ -30,18 +31,6 @@ export async function DELETE(
     const comment = await deleteComment(params.id)
     return new NextResponse(JSON.stringify(comment))
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

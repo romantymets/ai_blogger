@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { v4 as uuid } from 'uuid'
+import { NextRequest } from 'next/server'
 import { registration } from '@/helpers/api/service/auth-service'
-import { uploadImageToS3 } from '@/helpers/api/aws'
+import { saveS3Image } from '@/helpers/api/aws'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { generateResponse } from '@/utils/generateResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { registrationValidationSchema } from '@/helpers/validationSchema/registrationValidationSchema'
 
 /**
  * @swagger
@@ -47,49 +50,38 @@ import { uploadImageToS3 } from '@/helpers/api/aws'
  */
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    const image = formData.get('image') as Blob | null
-    const email = formData.get('email') as string | ''
-    const password = formData.get('password') as string | ''
-    const aboutUser = formData.get('aboutUser') as string | ''
-    const userName = formData.get('userName') as string | ''
-    let fileName
-    if (image) {
-      const mimeType = image.type
-      const fileExtension = mimeType.split('/')[1]
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, registrationValidationSchema)
 
-      const buffer = Buffer.from(await image.arrayBuffer())
-      fileName = await uploadImageToS3(buffer, uuid(), fileExtension)
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
+      })
     }
 
-    const userData = await registration({
+    const { email, password, aboutUser, userName, image = null } = data
+
+    const fileName = await saveS3Image(image)
+
+    const { tokens, user } = await registration({
       email,
       password,
       aboutUser,
       userName,
       ...(fileName && { image: fileName }),
     })
-    const response = new NextResponse(JSON.stringify(userData))
-    response.cookies.set({
-      name: 'refreshToken',
-      value: userData.refreshToken,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    } as any)
-    return response
+    return generateResponse(user, {
+      refreshToken: tokens.refreshToken,
+      accessToken: tokens.accessToken,
+      userId: user.userId,
+    })
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

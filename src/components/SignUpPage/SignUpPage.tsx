@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 
 import Link from 'next/link'
@@ -20,14 +21,10 @@ import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput'
 import UploadImage from '@/components/UIComponents/UploadImage/UploadImage'
 
 import { SIGN_UP, LOG_IN } from '@/constants/navigationLinks'
-import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
-
-interface IDefaultValues {
-  userName: string
-  email: string
-  password: string
-  aboutUser: string
-}
+import {
+  RegistrationCredential,
+  registrationValidationSchema,
+} from '@/helpers/validationSchema/registrationValidationSchema'
 
 const SignUpPage = () => {
   const {
@@ -44,23 +41,16 @@ const SignUpPage = () => {
 
   const router = useRouter()
 
-  const defaultValues: IDefaultValues = {
-    userName: '',
-    email: '',
-    password: '',
-    aboutUser: '',
-  }
-
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues,
+    resolver: yupResolver(registrationValidationSchema),
     mode: 'onBlur',
   })
 
-  const onSubmit = (data: IDefaultValues) => {
+  const onSubmit = (data: RegistrationCredential) => {
     onOpen()
     const formData = new FormData()
     formData.append('userName', data.userName)
@@ -108,10 +98,8 @@ const SignUpPage = () => {
                 label={'User Name'}
                 autoComplete={'userName'}
                 error={Boolean(errors.userName)}
-                helperText={errors.userName?.message}
-                register={register('userName', {
-                  required: 'User Name is required',
-                })}
+                helperText={errors?.userName?.message as string}
+                register={register('userName')}
               />
               <TextInput
                 id={'email'}
@@ -120,14 +108,8 @@ const SignUpPage = () => {
                 autoComplete={'email'}
                 label={'Email address'}
                 error={Boolean(errors.email)}
-                helperText={errors.email?.message}
-                register={register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: EmailRegExp,
-                    message: 'Email not correct',
-                  },
-                })}
+                helperText={errors.email?.message as string}
+                register={register('email')}
               />
 
               <PasswordInput
@@ -136,15 +118,8 @@ const SignUpPage = () => {
                 autoComplete={'password'}
                 label={'Password'}
                 error={Boolean(errors.password)}
-                helperText={errors.password?.message}
-                register={register('password', {
-                  required: 'Password is required',
-                  pattern: {
-                    value: PasswordRegExp,
-                    message:
-                      'Minimum eight characters, at least one letter and one number',
-                  },
-                })}
+                helperText={errors.password?.message as string}
+                register={register('password')}
               />
             </div>
 
@@ -182,7 +157,7 @@ const SignUpPage = () => {
                     alt={'image'}
                     width={80}
                     height={80}
-                    className={'rounded-full w-20 h-20'}
+                    className={'rounded-full w-20 h-20 object-cover'}
                   />
                 ) : (
                   <UserCircleIcon

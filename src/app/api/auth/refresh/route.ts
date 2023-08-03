@@ -1,6 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { refresh } from '@/helpers/api/service/auth-service'
-import { ApiError } from '@/helpers/api/exceptions/api-error'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { generateResponse } from '@/utils/generateResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { refreshValidationSchema } from '@/helpers/validationSchema/refreshValidationSchema'
 
 /**
  * @swagger
@@ -29,37 +32,31 @@ import { ApiError } from '@/helpers/api/exceptions/api-error'
  *               accessToken: token
  *               refreshToken: token
  */
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const authorizationHeaders = req.headers.get('authorization')
-    if (!authorizationHeaders) {
-      throw new ApiError(401, 'Token is required')
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, refreshValidationSchema)
+
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 401,
+        message: errors[0],
+        errors,
+      })
     }
-    const refreshToken = authorizationHeaders.split(' ')[1]
-    if (!refreshToken) {
-      throw new ApiError(401, 'Token is required')
-    }
-    const userData = await refresh(refreshToken)
-    const response = new NextResponse(JSON.stringify(userData))
-    response.cookies.set({
-      name: 'refreshToken',
-      value: userData.refreshToken,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    } as any)
-    return response
+    const { userId, refreshToken } = data
+
+    const userData = await refresh(refreshToken, userId)
+    return generateResponse(userData, {
+      refreshToken: userData.refreshToken,
+      accessToken: userData.accessToken,
+      userId: userData.userId,
+    })
   } catch (error) {
-    console.error('error ==>', error)
-    return new NextResponse(
-      JSON.stringify({
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

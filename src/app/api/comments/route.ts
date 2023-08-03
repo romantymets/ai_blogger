@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createComment } from '@/helpers/api/service/comment-service'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
 
 /**
  * @swagger
@@ -48,18 +49,6 @@ export async function POST(request: NextRequest) {
     })
     return new NextResponse(JSON.stringify(commentData))
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

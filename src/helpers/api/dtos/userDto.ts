@@ -1,7 +1,7 @@
-import { Users } from 'prisma/prisma-client'
+import { User } from 'prisma/prisma-client'
 import { generateImageUrl } from '@/helpers/api/aws'
 
-export const generateUserDto = async (user: Users) => {
+export const generateUserDto = async (user: User) => {
   return {
     email: user.email,
     userId: user.id,

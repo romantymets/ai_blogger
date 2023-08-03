@@ -25,7 +25,7 @@ export const findPostById = async (id: string) => {
   if (!id) {
     throw new ApiError(500, 'Bad credential')
   }
-  const post = await prisma.posts.findUnique({
+  const post = await prisma.post.findUnique({
     where: {
       id,
     },
@@ -68,7 +68,7 @@ export const createPost = async ({
     throw ApiError.BadRequest(`user with ${id} not exist`)
   }
 
-  return await prisma.posts.create({
+  return await prisma.post.create({
     data: {
       title,
       content,
@@ -86,7 +86,7 @@ export const deletePost = async (id: string) => {
     await deleteS3image(post.image)
   }
 
-  return await prisma.posts.delete({
+  return await prisma.post.delete({
     where: {
       id,
     },
@@ -95,8 +95,8 @@ export const deletePost = async (id: string) => {
 
 export const getAllPosts = async (query: any, countQuery = {}) => {
   try {
-    const total = await prisma.posts.count(countQuery)
-    const posts = await prisma.posts.findMany(query)
+    const total = await prisma.post.count(countQuery)
+    const posts = await prisma.post.findMany(query)
 
     const newPosts = await generatePostsResponse(posts)
 
@@ -108,7 +108,7 @@ export const getAllPosts = async (query: any, countQuery = {}) => {
 
 export const getResentPosts = async (id: string) => {
   try {
-    const posts = await prisma.posts.findMany({
+    const posts = await prisma.post.findMany({
       where: {
         NOT: {
           id,
@@ -141,7 +141,7 @@ export const updatePost = async (postData: CreatePostCredential) => {
     }
   }
 
-  const updatedPost = await prisma.posts.update({
+  const updatedPost = await prisma.post.update({
     where: {
       id: postData.id,
     },

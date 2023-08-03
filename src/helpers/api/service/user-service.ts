@@ -9,14 +9,14 @@ import { findUserFromDbByEmail } from '@/helpers/api/service/auth-service'
 import { ApiError } from '@/helpers/api/exceptions/api-error'
 import { deleteS3image } from '@/helpers/api/aws'
 import { generateUserDto } from '@/helpers/api/dtos/userDto'
-import { generateTokens, saveToken } from '@/helpers/api/service/token-service'
+import { generateTokens } from '@/helpers/api/service/token-service'
 import { generateTokensDto } from '@/helpers/api/dtos/tokensDto'
 
 export const findUserById = async (id: string) => {
   if (!id) {
     throw new ApiError(500, 'Bad credential')
   }
-  const user = await prisma.users.findUnique({
+  const user = await prisma.user.findUnique({
     where: {
       id,
     },
@@ -37,10 +37,10 @@ export const createUser = async (payload: CreateUserCredential) => {
     throw ApiError.BadRequest(`user with ${payload.email} already exist`)
   }
   const hashedPassword = await bcrypt.hash(payload.password, 3)
-  return await prisma.users.create({
+  return await prisma.user.create({
     data: {
       email: payload.email,
-      hashedPassword,
+      password: hashedPassword,
       userName: payload.userName,
       aboutUser: payload.aboutUser,
       image: payload.image,
@@ -51,7 +51,7 @@ export const createUser = async (payload: CreateUserCredential) => {
 export const deleteUser = async (id: string) => {
   const user = await findUserById(id)
 
-  const posts = await prisma.posts.findMany({
+  const posts = await prisma.post.findMany({
     where: {
       authorId: id,
     },
@@ -69,17 +69,15 @@ export const deleteUser = async (id: string) => {
     await deleteS3image(user.image)
   }
 
-  const deleteUser = await prisma.users.delete({
+  return await prisma.user.delete({
     where: {
       id,
     },
   })
-
-  return deleteUser
 }
 
 export const getAllUsers = async () =>
-  await prisma.users.findMany({
+  await prisma.user.findMany({
     include: {
       posts: true,
       comments: true,
@@ -117,7 +115,7 @@ export const updateUser = async (
 
   const tokens = await generateTokens(tokensDto)
 
-  const updatedUser = await prisma.users.update({
+  const updatedUser = await prisma.user.update({
     where: {
       id,
     },
@@ -127,8 +125,6 @@ export const updateUser = async (
       ...(userData?.image && { image: userData.image }),
     },
   })
-
-  await saveToken(updatedUser.id, tokens.refreshToken)
 
   const userDto = await generateUserDto(updatedUser)
   return {
