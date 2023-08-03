@@ -12,6 +12,9 @@ const generateNewTokens = async (cookie: CookiesCredential) => {
   return await fetch(`${process.env.CANONICAL_URL}/api/auth/refresh`, {
     credentials: 'include',
     method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({
       refreshToken: cookie.refreshToken,
       userId: cookie.userId,
