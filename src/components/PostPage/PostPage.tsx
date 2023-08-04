@@ -29,7 +29,7 @@ const PostPage = ({ post, recentPosts, comments }: IPostProps) => {
       <div className="flex w-full justify-center py-20 bg-athensGray">
         <PostBody {...post} />
       </div>
-      {recentPosts && <RecentPosts recentPosts={recentPosts} />}
+      {recentPosts?.length > 0 && <RecentPosts recentPosts={recentPosts} />}
       <Comments postId={post.id} author={post.author} comments={comments} />
     </Fragment>
   )

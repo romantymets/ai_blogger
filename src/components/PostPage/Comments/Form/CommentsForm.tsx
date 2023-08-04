@@ -27,7 +27,7 @@ interface Props {
 const CommentsForm = ({ author, postId }: Props) => {
   const { open: loading, onOpen, onClose } = useToggle()
   const router = useRouter()
-  const defaultValues: IDefaultValues = {
+  const defaultValues = {
     comment: '',
   }
 
@@ -52,11 +52,10 @@ const CommentsForm = ({ author, postId }: Props) => {
     return commentService
       .createComment({
         comment,
-        authorId: user.userId,
         postId,
       })
       .then(() => {
-        alertService.success('Comment successful')
+        alertService.success('Comment successful created')
         router.refresh()
         reset()
         onClose()

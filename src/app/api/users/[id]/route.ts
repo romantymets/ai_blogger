@@ -9,6 +9,7 @@ import { generateErrorResponse } from '@/utils/generateErrorResponse'
 import { parseBody } from '@/helpers/api/middleware/parseBody'
 import { updateUserValidationSchema } from '@/helpers/validationSchema/updateUserValidationSchema'
 import { generateResponse, removeCookies } from '@/utils/generateResponse'
+import { ParamsId } from '@/models/params'
 
 /**
  * @swagger
@@ -36,10 +37,7 @@ import { generateResponse, removeCookies } from '@/utils/generateResponse'
  *                 aboutUser: about user
 
  */
-export async function GET(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function GET(request: Request, { params }: ParamsId) {
   try {
     const userData = await getUserById(params.id)
     return generateResponse({ data: userData })
@@ -82,10 +80,7 @@ export async function GET(
  *                 aboutUser: my name is user
  *                 image: some image
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: ParamsId) {
   try {
     const {
       isValid,
@@ -144,10 +139,7 @@ export async function PUT(
  *                 aboutUser: my name is user
  *                 image: some image
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: ParamsId) {
   try {
     const userData = await deleteUser(params.id)
     const response = generateResponse(userData)

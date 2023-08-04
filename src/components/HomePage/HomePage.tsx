@@ -5,6 +5,7 @@ import Pagination from '@/components/UIComponents/Pagination'
 import { HOME } from '@/constants/navigationLinks'
 import Search from '@/components/HomePage/Search'
 import { Post } from '@/models/postsModel'
+import { POST_LIMIT } from '@/constants/pagination'
 
 interface HomeProps {
   posts?: Post[]
@@ -26,13 +27,21 @@ const HomePage = ({ posts, total, page, searchData }: HomeProps) => {
           }
         >
           <Search searchData={searchData} />
-          <PostsList posts={posts} />
-          <Pagination
-            total={total}
-            page={page}
-            postsLength={posts?.length}
-            href={HOME.href}
-          />
+          {posts?.length > 0 ? (
+            <PostsList posts={posts} />
+          ) : (
+            <div className={'min-h-[300px] flex items-center'}>
+              <p className={'text-paleSky'}>Post will be added soon</p>
+            </div>
+          )}
+          {total > POST_LIMIT && (
+            <Pagination
+              total={total}
+              page={page}
+              postsLength={posts?.length}
+              href={HOME.href}
+            />
+          )}
         </div>
       </div>
     </section>

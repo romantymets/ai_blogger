@@ -23,6 +23,8 @@ import TextArea from '@/components/UIComponents/Inputs/TextArea'
 
 import defImage from 'public/postHero.jpg'
 import HeroContent from '@/components/CreatePostPage/HeroContent'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { postValidationSchema } from '@/helpers/validationSchema/postValidationSchema'
 
 interface IDefaultValues {
   title: string
@@ -46,10 +48,11 @@ const CreatePostPage = () => {
   } = useImageUpload()
   const { open: loading, onOpen, onClose } = useToggle()
 
-  const defaultValues: IDefaultValues = {
+  const defaultValues = {
     title: '',
     content: '',
     subtitle: '',
+    image: null,
   }
 
   const {
@@ -59,12 +62,13 @@ const CreatePostPage = () => {
     formState: { errors },
   } = useForm({
     defaultValues,
+    resolver: yupResolver(postValidationSchema),
     mode: 'onBlur',
   })
 
   const onSubmit = (data: IDefaultValues) => {
     if (!user?.userId) {
-      alertService.error('Updated not found')
+      alertService.error('User not found')
       return
     }
     const formData = new FormData()
@@ -74,8 +78,6 @@ const CreatePostPage = () => {
     formData.append('subtitle', data.subtitle)
 
     formData.append('content', data.content)
-
-    formData.append('userId', user.userId)
 
     if (selectedImage) {
       formData.append('image', selectedImage)
@@ -98,7 +100,7 @@ const CreatePostPage = () => {
       })
   }
 
-  const [title, subtitle] = watch(['title', 'subtitle'])
+  const [title, subtitle] = watch(['title', 'subtitle'] as any)
 
   return (
     <AuthGuard>
@@ -124,10 +126,8 @@ const CreatePostPage = () => {
                     type={'text'}
                     label={'Title'}
                     error={Boolean(errors.title)}
-                    helperText={errors.title?.message}
-                    register={register('title', {
-                      required: 'Title is required',
-                    })}
+                    helperText={errors.title?.message as string}
+                    register={register('title')}
                   />
                 </div>
 
@@ -152,10 +152,8 @@ const CreatePostPage = () => {
                     autoComplete={'content'}
                     rows={15}
                     error={Boolean(errors.content)}
-                    helperText={errors.content?.message}
-                    register={register('content', {
-                      required: 'Article is required',
-                    })}
+                    helperText={errors.content?.message as string}
+                    register={register('content')}
                   />
                 </div>
 

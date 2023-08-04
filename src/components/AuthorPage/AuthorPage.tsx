@@ -8,6 +8,7 @@ import { AUTHOR } from '@/constants/navigationLinks'
 
 import { Post } from '@/models/postsModel'
 import { Author } from '@/models/userModel'
+import { POST_LIMIT } from '@/constants/pagination'
 
 interface AuthorProps {
   posts: Post[]
@@ -27,12 +28,14 @@ const AuthorPage: FC<AuthorProps> = ({ posts, author, total, page }) => {
         <AboutAuthor {...author} postsQuantity={total} />
         <section className={'max-w-2xl w-full'}>
           <PostsList posts={posts} />
-          <Pagination
-            page={page}
-            total={total}
-            href={`${AUTHOR.href}/${author.userId}`}
-            postsLength={posts?.length}
-          />
+          {posts?.length > POST_LIMIT && (
+            <Pagination
+              page={page}
+              total={total}
+              href={`${AUTHOR.href}/${author.userId}`}
+              postsLength={posts?.length}
+            />
+          )}
         </section>
       </div>
     </section>

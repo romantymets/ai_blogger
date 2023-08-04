@@ -29,6 +29,8 @@ import defImage from 'public/postHero.jpg'
 
 import { Post } from '@/models/postsModel'
 import { revalidateService } from '@/services/revalidate.service'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { postValidationSchema } from '@/helpers/validationSchema/postValidationSchema'
 
 interface IDefaultValues {
   title: string
@@ -62,10 +64,11 @@ const EditPostPage = ({ post }: { post: Post }) => {
     dragActive,
   } = useImageUpload()
 
-  const defaultValues: IDefaultValues = {
+  const defaultValues = {
     title: post.title,
     content: post.content,
     subtitle: post?.subtitle || '',
+    image: null,
   }
 
   const {
@@ -75,12 +78,13 @@ const EditPostPage = ({ post }: { post: Post }) => {
     formState: { errors },
   } = useForm({
     defaultValues,
+    resolver: yupResolver(postValidationSchema),
     mode: 'onBlur',
   })
 
   const onSubmit = (data: IDefaultValues) => {
     if (!user?.userId) {
-      alertService.error('User not found')
+      alertService.error('Author not found')
       return
     }
     const formData = new FormData()
@@ -112,7 +116,7 @@ const EditPostPage = ({ post }: { post: Post }) => {
       })
   }
 
-  const [title, subtitle] = watch(['title', 'subtitle'])
+  const [title, subtitle] = watch(['title', 'subtitle'] as any)
 
   const handleDelete = () => {
     setLoading(true)
@@ -160,10 +164,8 @@ const EditPostPage = ({ post }: { post: Post }) => {
                     type={'text'}
                     label={'Title'}
                     error={Boolean(errors.title)}
-                    helperText={errors.title?.message}
-                    register={register('title', {
-                      required: 'Title is required',
-                    })}
+                    helperText={errors.title?.message as string}
+                    register={register('title')}
                   />
                 </div>
 
@@ -173,9 +175,7 @@ const EditPostPage = ({ post }: { post: Post }) => {
                     name={'subtitle'}
                     type={'text'}
                     label={'Subtitle'}
-                    register={register('subtitle', {
-                      required: false,
-                    })}
+                    register={register('subtitle')}
                   />
                 </div>
 
@@ -188,10 +188,8 @@ const EditPostPage = ({ post }: { post: Post }) => {
                     autoComplete={'content'}
                     rows={15}
                     error={Boolean(errors.content)}
-                    helperText={errors.content?.message}
-                    register={register('content', {
-                      required: 'Article is required',
-                    })}
+                    helperText={errors.content?.message as string}
+                    register={register('content')}
                   />
                 </div>
 
