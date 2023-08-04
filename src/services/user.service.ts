@@ -17,7 +17,8 @@ const userSubject = new BehaviorSubject(
 )
 
 const register = async (user: FormData) => {
-  return await fetchWrapper.post(`${baseAuthUrl}/registration`, user)
+  const userRes = await fetchWrapper.post(`${baseAuthUrl}/registration`, user)
+  saveUser(userRes)
 }
 
 const login = async (data: LoginCredential) => {
@@ -29,7 +30,8 @@ const resetPassword = async (data: ResetPasswordCredential) => {
   return await fetchWrapper.post(`${baseAuthUrl}/reset-password`, data)
 }
 
-const logout = () => {
+const logout = async () => {
+  await fetchWrapper.post(`${baseAuthUrl}/logout`)
   localStorage.removeItem('user')
   userSubject.next(null)
 }
@@ -47,7 +49,7 @@ const updateUser = async (id: string, userData: FormData) => {
 
 const deleteUser = async (id: string) => {
   const user = await fetchWrapper.delete(`${baseUsersUrl}/${id}`)
-  logout()
+  await logout()
   return user
 }
 

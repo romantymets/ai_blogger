@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import {
   deleteUser,
   getUserById,
@@ -6,6 +6,9 @@ import {
 } from '@/helpers/api/service/user-service'
 import { saveS3Image } from '@/helpers/api/aws'
 import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { updateUserValidationSchema } from '@/helpers/validationSchema/updateUserValidationSchema'
+import { generateResponse, removeCookies } from '@/utils/generateResponse'
 
 /**
  * @swagger
@@ -39,7 +42,7 @@ export async function GET(
 ) {
   try {
     const userData = await getUserById(params.id)
-    return NextResponse.json({ data: userData })
+    return generateResponse({ data: userData })
   } catch (error) {
     return generateErrorResponse(error)
   }
@@ -73,37 +76,46 @@ export async function GET(
  *                 userName: string
  *                 aboutUser: string
  *                 image: string
- *                 accessToken: string
- *                 refreshToken: string
  *             example:
  *                 email: test@test.com
  *                 userName: user
  *                 aboutUser: my name is user
  *                 image: some image
- *                 accessToken: token
- *                 refreshToken: token
  */
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const formData = await request.formData()
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, updateUserValidationSchema)
 
-    const aboutUser = formData.get('aboutUser') as string | ''
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
+      })
+    }
 
-    const userName = formData.get('userName') as string | ''
-
-    const image = formData.get('image') as Blob | null
+    const { aboutUser, userName, image = null } = data
 
     const fileName = await saveS3Image(image)
 
-    const userData = await updateUser(params.id, {
+    const { user, tokens } = await updateUser(params.id, {
       aboutUser,
       userName,
       ...(fileName && { image: fileName }),
     })
-    return new NextResponse(JSON.stringify(userData))
+    return generateResponse(user, {
+      refreshToken: tokens.refreshToken,
+      accessToken: tokens.accessToken,
+      userId: user.userId,
+    })
   } catch (error) {
     return generateErrorResponse(error)
   }
@@ -126,15 +138,11 @@ export async function PUT(
  *                 userName: string
  *                 aboutUser: string
  *                 image: string
- *                 accessToken: string
- *                 refreshToken: string
  *             example:
  *                 email: test@test.com
  *                 userName: user
  *                 aboutUser: my name is user
  *                 image: some image
- *                 accessToken: token
- *                 refreshToken: token
  */
 export async function DELETE(
   request: Request,
@@ -142,7 +150,9 @@ export async function DELETE(
 ) {
   try {
     const userData = await deleteUser(params.id)
-    return new NextResponse(JSON.stringify(userData))
+    const response = generateResponse(userData)
+    removeCookies(response)
+    return response
   } catch (error) {
     return generateErrorResponse(error)
   }

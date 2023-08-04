@@ -51,7 +51,7 @@ function request(method: string) {
         isPrivateApi
       ) {
         // auto refresh if 401 Unauthorized or 403 Forbidden response returned from api
-        userService.logout()
+        await userService.logout()
         alertService.error('Unauthorized')
         const error = (response && errorData?.message) || response.statusText
         return Promise.reject(new Error(error))

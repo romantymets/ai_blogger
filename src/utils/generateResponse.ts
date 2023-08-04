@@ -9,7 +9,7 @@ export interface CookiesCredential {
 export const setCookies = (
   response: NextResponse,
   cookies: CookiesCredential
-) => {
+): NextResponse => {
   response.cookies.set({
     name: 'accessToken',
     value: cookies.accessToken,
@@ -30,10 +30,20 @@ export const setCookies = (
   return response
 }
 
-export const generateResponse = (data: any, cookies?: CookiesCredential) => {
+export const generateResponse = (
+  data: any,
+  cookies?: CookiesCredential
+): NextResponse => {
   const response = new NextResponse(JSON.stringify(data))
   if (cookies) {
     setCookies(response, cookies)
   }
+  return response
+}
+
+export const removeCookies = (response: NextResponse): NextResponse => {
+  response.cookies.delete('accessToken' as any)
+  response.cookies.delete('userId' as any)
+  response.cookies.delete('refreshToken' as any)
   return response
 }

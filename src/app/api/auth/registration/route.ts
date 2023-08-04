@@ -38,15 +38,11 @@ import { registrationValidationSchema } from '@/helpers/validationSchema/registr
  *               userName: string
  *               aboutUser: string
  *               image: string
- *               accessToken: string
- *               refreshToken: string
  *             example:
  *               email: test@test.com
  *               userName: user
  *               aboutUser: my name is user
  *               image: some image
- *               accessToken: token
- *               refreshToken: token
  */
 export async function POST(request: NextRequest) {
   try {

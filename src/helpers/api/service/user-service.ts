@@ -5,12 +5,13 @@ import {
   CreateUserCredential,
   UpdateUserCredential,
 } from '@/models/userServiceModel'
-import { findUserFromDbByEmail } from '@/helpers/api/service/auth-service'
+import {
+  findUserFromDbByEmail,
+  generateUserData,
+} from '@/helpers/api/service/auth-service'
 import { ApiError } from '@/helpers/api/exceptions/api-error'
 import { deleteS3image } from '@/helpers/api/aws'
 import { generateUserDto } from '@/helpers/api/dtos/userDto'
-import { generateTokens } from '@/helpers/api/service/token-service'
-import { generateTokensDto } from '@/helpers/api/dtos/tokensDto'
 
 export const findUserById = async (id: string) => {
   if (!id) {
@@ -29,9 +30,6 @@ export const findUserById = async (id: string) => {
 }
 
 export const createUser = async (payload: CreateUserCredential) => {
-  if (!payload?.email) {
-    throw ApiError.BadRequest('Bad credential')
-  }
   const candidate = await findUserFromDbByEmail(payload.email)
   if (candidate) {
     throw ApiError.BadRequest(`user with ${payload.email} already exist`)
@@ -100,6 +98,10 @@ export const updateUser = async (
 ) => {
   const user = await findUserById(id)
 
+  if (!user) {
+    throw new ApiError(500, 'User not found')
+  }
+
   if (userData?.image) {
     if (user?.image !== userData?.image) {
       if (user?.image) {
@@ -107,13 +109,6 @@ export const updateUser = async (
       }
     }
   }
-
-  const tokensDto = await generateTokensDto({
-    ...user,
-    userName: userData.userName,
-  })
-
-  const tokens = await generateTokens(tokensDto)
 
   const updatedUser = await prisma.user.update({
     where: {
@@ -126,9 +121,10 @@ export const updateUser = async (
     },
   })
 
-  const userDto = await generateUserDto(updatedUser)
+  const { userDto, tokens } = await generateUserData(updatedUser)
+
   return {
-    ...tokens,
-    ...userDto,
+    tokens,
+    user: userDto,
   }
 }

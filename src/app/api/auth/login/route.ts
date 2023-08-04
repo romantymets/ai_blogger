@@ -30,15 +30,11 @@ import { loginValidationSchema } from '@/helpers/validationSchema/loginValidatio
  *               email: string
  *               userId: string
  *               image: string
- *               accessToken: string
- *               refreshToken: string
  *             example:
  *               email: test@test.com
  *               userId: 123h
  *               userName: user
  *               image: some image
- *               accessToken: token
- *               refreshToken: token
  */
 export async function POST(request: NextRequest) {
   try {
