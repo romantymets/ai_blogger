@@ -99,11 +99,13 @@ const CommentsForm = ({ author, postId }: Props) => {
       <div className={'h-[1px] w-full bg-silver mt-5 mb-5'} />
       <div className={'flex justify-end'}>
         <button
-          className={'text-white px-5 py-2 bg-azureRadiance rounded-md'}
+          className={
+            'text-white px-5 py-2 bg-azureRadiance rounded-md min-w-[120px]'
+          }
           type="submit"
           disabled={loading}
         >
-          {loading ? <Spinner className={'h-4 w-4'} /> : 'Comment'}
+          {loading ? <Spinner className={'h-[20px] w-[20px]'} /> : 'Comment'}
         </button>
       </div>
     </form>
