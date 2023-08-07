@@ -3,14 +3,21 @@ import { mostPopular, newest } from '@/components/HomePage/SortsList/SortsLit'
 export const getPostsOrder = (key?: string) => {
   switch (key) {
     case newest.key:
-      return { createdAt: 'desc' }
+      return [{ createdAt: 'desc' }]
     case mostPopular.key:
-      return {
-        comments: {
-          _count: 'desc',
+      return [
+        {
+          likes: {
+            _count: 'desc',
+          },
         },
-      }
+        {
+          comments: {
+            _count: 'desc',
+          },
+        },
+      ]
     default:
-      return { createdAt: 'desc' }
+      return [{ createdAt: 'desc' }]
   }
 }

@@ -32,6 +32,7 @@ export const findPostById = async (id: string) => {
     include: {
       author: true,
       comments: true,
+      likes: true,
     },
   })
 

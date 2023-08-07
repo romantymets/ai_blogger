@@ -13,6 +13,7 @@ export const generateAuthorPostListQuery = (
     include: {
       author: true,
       comments: true,
+      likes: true,
     },
     orderBy: [{ createdAt: 'desc' }],
   }

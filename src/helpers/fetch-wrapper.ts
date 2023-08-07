@@ -1,7 +1,12 @@
 import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
-export const privateApi = ['/api/users', '/api/posts', '/api/comments']
+export const privateApi = [
+  '/api/users',
+  '/api/posts',
+  '/api/comments',
+  '/api/favorite',
+]
 
 interface RequestOptions {
   method: string

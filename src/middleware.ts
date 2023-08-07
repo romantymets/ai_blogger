@@ -66,5 +66,10 @@ export async function middleware(request: NextRequest) {
 
 // Limit the middleware to paths starting with `/api/`
 export const config = {
-  matcher: ['/api/users/:path*', '/api/posts/:path*', '/api/comments/:path*'],
+  matcher: [
+    '/api/users/:path*',
+    '/api/posts/:path*',
+    '/api/comments/:path*',
+    '/api/favorite/:path*',
+  ],
 }

@@ -24,7 +24,7 @@ interface Props {
   postId: string
 }
 
-const CommentsForm = ({ author, postId }: Props) => {
+const CommentsForm = ({ postId }: Props) => {
   const { open: loading, onOpen, onClose } = useToggle()
   const router = useRouter()
   const defaultValues = {
@@ -72,7 +72,13 @@ const CommentsForm = ({ author, postId }: Props) => {
       className="p-5 border border-azureRadiance rounded"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <CommentAuthor {...author} />
+      {user?.userId && (
+        <CommentAuthor
+          id={user.userId}
+          userName={user.userName}
+          image={user?.image}
+        />
+      )}
       <div className="mt-4">
         <textarea
           id={'comment'}

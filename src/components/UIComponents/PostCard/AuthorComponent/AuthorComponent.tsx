@@ -7,15 +7,24 @@ import { UserCircleIcon } from '@heroicons/react/24/solid'
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline'
 import { AUTHOR } from '@/constants/navigationLinks'
 
-import { PostAuthor } from '@/models/postsModel'
+import { LikeItem, PostAuthor } from '@/models/postsModel'
+import LikeButton from '@/components/UIComponents/PostCard/AuthorComponent/LikeButton'
 
 interface Props {
   author: PostAuthor
   comments?: number
   authorId: string
+  postId: string
+  likes: LikeItem[] | []
 }
 
-const AuthorComponent = ({ author, comments, authorId }: Props) => {
+const AuthorComponent = ({
+  author,
+  comments,
+  authorId,
+  postId,
+  likes,
+}: Props) => {
   const router = useRouter()
 
   const handleNavigate = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -49,12 +58,13 @@ const AuthorComponent = ({ author, comments, authorId }: Props) => {
         )}
         <div className={'flex flex-col ml-4'}>
           <p>By {author.userName}</p>
-          {comments > 0 && (
-            <div className="text-paleSky text-xs flex items-start">
-              <span className="mr-3">{comments || 0}</span>
-              <ChatBubbleLeftEllipsisIcon className="h-[14px] w-[18px]" />
+          <div className={'flex'}>
+            <div className="text-paleSky text-xs flex items-center">
+              <ChatBubbleLeftEllipsisIcon className="h-[20px] w-[24px]" />
+              <span className="ml-3">{comments || 0}</span>
             </div>
-          )}
+            <LikeButton postId={postId} likes={likes} />
+          </div>
         </div>
       </div>
     </div>
