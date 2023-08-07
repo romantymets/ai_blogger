@@ -37,7 +37,7 @@ export async function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refreshToken' as any)
   const userId = request.cookies.get('userId' as any)
 
-  if (!accessToken?.value) {
+  if (!accessToken?.value && !refreshToken?.value) {
     return authenticationFailedResponse
   }
 

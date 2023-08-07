@@ -28,10 +28,9 @@ export const generateUserData = async (user: User) => {
 export const registration = async (payload: CreateUserCredential) => {
   const candidate = await createUser(payload)
 
-  const { userDto, tokens } = await generateUserData(candidate)
+  const { userDto } = await generateUserData(candidate)
   return {
     user: userDto,
-    tokens,
   }
 }
 

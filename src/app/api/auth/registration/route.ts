@@ -65,18 +65,14 @@ export async function POST(request: NextRequest) {
 
     const fileName = await saveS3Image(image)
 
-    const { tokens, user } = await registration({
+    const { user } = await registration({
       email,
       password,
       aboutUser,
       userName,
       ...(fileName && { image: fileName }),
     })
-    return generateResponse(user, {
-      refreshToken: tokens.refreshToken,
-      accessToken: tokens.accessToken,
-      userId: user.userId,
-    })
+    return generateResponse(user)
   } catch (error) {
     return generateErrorResponse(error)
   }
