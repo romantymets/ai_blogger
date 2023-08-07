@@ -18,7 +18,7 @@ import {
 import { UserCircleIcon, Bars3Icon } from '@heroicons/react/24/solid'
 import useGetUser from '@/hooks/useGetUser'
 
-import { saveUser, userService } from '@/services/user.service'
+import { userService } from '@/services/user.service'
 import { useRouter } from 'next/navigation'
 
 const Profile = () => {
@@ -33,12 +33,6 @@ const Profile = () => {
         .then(({ data }) => {
           if (data?.image) {
             setUserImage(data.image)
-            saveUser({
-              email: data.email,
-              userId: data.userId,
-              userName: data.userName,
-              image: data.image,
-            })
           }
         })
         .catch((error) => {
@@ -50,8 +44,9 @@ const Profile = () => {
   }, [user])
 
   const handleLogOut = () => {
-    userService.logout()
-    router.push(LOG_IN.href)
+    userService.logout().then(() => {
+      router.push(LOG_IN.href)
+    })
   }
 
   const profile = user
