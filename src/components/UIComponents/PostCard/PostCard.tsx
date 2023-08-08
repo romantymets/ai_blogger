@@ -17,6 +17,7 @@ const PostCard = ({
   content,
   authorId,
   likes,
+  popularity,
 }: Post) => {
   return (
     <div className="max-w-[320px] w-full h-full bg-white border border-gray-200 rounded-lg shadow cursor-pointer">
@@ -50,6 +51,7 @@ const PostCard = ({
           authorId={authorId}
           postId={id}
           likes={likes}
+          popularity={popularity}
         />
       </div>
     </div>

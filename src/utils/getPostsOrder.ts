@@ -7,12 +7,12 @@ export const getPostsOrder = (key?: string) => {
     case mostPopular.key:
       return [
         {
-          likes: {
+          comments: {
             _count: 'desc',
           },
         },
         {
-          comments: {
+          likes: {
             _count: 'desc',
           },
         },
