@@ -37,13 +37,14 @@ export async function middleware(request: NextRequest) {
   const refreshToken = request.cookies.get('refreshToken' as any)
   const userId = request.cookies.get('userId' as any)
 
-  if (!accessToken?.value) {
+  if (!accessToken?.value && !refreshToken?.value) {
     return authenticationFailedResponse
   }
 
   const isAssesTokenValid = await validateAccessToken(
     accessToken?.value as string
   )
+
   if (!isAssesTokenValid) {
     const refreshData = await getNewTokensData({
       refreshToken: refreshToken?.value,

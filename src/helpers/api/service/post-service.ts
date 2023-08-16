@@ -168,7 +168,11 @@ export const getResentPosts = async (id: string) => {
 }
 
 export const updatePost = async (postData: CreatePostCredential) => {
-  const post = await findPostById(postData.id)
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postData.id,
+    },
+  })
 
   if (postData?.image) {
     if (post?.image !== postData?.image) {
@@ -180,7 +184,7 @@ export const updatePost = async (postData: CreatePostCredential) => {
 
   const updatedPost = await prisma.post.update({
     where: {
-      id: postData.id,
+      id: post.id,
     },
     include: {
       author: true,

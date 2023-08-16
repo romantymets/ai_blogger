@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "test": "dotenv -e .env.test -- yarn docker:up && jest -i",
+    "coverage": "jest --coverage"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.370.0",
@@ -18,10 +22,11 @@
     "@tailwindcss/forms": "^0.5.3",
     "autoprefixer": "10.4.14",
     "bcrypt": "^5.1.0",
+    "dotenv-cli": "^7.2.1",
     "envalid": "^7.2.2",
     "jose": "^4.14.4",
     "lodash": "^4.17.21",
-    "next": "13.4.12",
+    "next": "13.4.16",
     "next-swagger-doc": "^0.4.0",
     "postcss": "8.4.24",
     "react": "18.2.0",
@@ -35,8 +40,10 @@
     "yup": "^1.2.0"
   },
   "devDependencies": {
+    "@jest/types": "^29.6.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^14.0.0",
     "@types/bcrypt": "^5.0.0",
-    "@types/jsonwebtoken": "^9.0.2",
     "@types/multer": "^1.4.7",
     "@types/node": "20.3.3",
     "@types/react": "18.2.14",
@@ -54,8 +61,12 @@
     "eslint-plugin-promise": "6.1.1",
     "eslint-plugin-react": "7.32.2",
     "eslint-plugin-react-hooks": "4.6.0",
+    "eslint-plugin-testing-library": "^5.11.1",
+    "jest": "^29.6.2",
+    "jest-environment-jsdom": "^29.6.2",
     "prettier": "2.8.8",
-    "prisma": "^5.1.1",
+    "prisma": "^5.1.0",
+    "ts-jest": "^29.1.1",
     "typescript": "5.1.6"
   }
 }
