@@ -4,12 +4,16 @@ import React from 'react'
 import { HeartIcon } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartIconSolid } from '@heroicons/react/24/solid'
 import { classNames } from '@/utils/classNames'
-import { favoriteService } from '@/services/favorite.service'
+// import { favoriteService } from '@/services/favorite.service'
 import { alertService } from '@/services/alerts-service'
 import useGetUser from '@/hooks/useGetUser'
 import { useRouter } from 'next/navigation'
 import { LikeItem } from '@/models/postsModel'
-import useToggle from '@/hooks/useToggle'
+// import useToggle from '@/hooks/useToggle'
+import {
+  useCreateFavoriteMutation,
+  useDeleteFavoriteMutation,
+} from '@/gql/graphql'
 
 interface Props {
   postId: string
@@ -25,9 +29,13 @@ const getLikedPost = (likes: LikeItem[], postId: string, userId: string) => {
 const LikeButton = ({ postId, likes }: Props) => {
   const { user } = useGetUser()
   const router = useRouter()
-  const { open: loading, onOpen, onClose } = useToggle()
-
+  // const { open: loading, onOpen, onClose } = useToggle()
   const likedPost = getLikedPost(likes, postId, user?.userId)
+
+  const [createFavoriteMutation, { loading }] = useCreateFavoriteMutation()
+
+  const [deleteFavoriteMutation, { loading: unLikeLoading }] =
+    useDeleteFavoriteMutation()
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -35,32 +43,63 @@ const LikeButton = ({ postId, likes }: Props) => {
       alertService.error('Please login')
       return
     }
-    onOpen()
     likedPost?.id
-      ? favoriteService
-          .deleteFavorite(likedPost.id)
+      ? deleteFavoriteMutation({
+          variables: {
+            id: likedPost.id,
+          },
+        })
           .then(() => {
-            onClose()
             router.refresh()
           })
           .catch((e) => {
             console.error(e)
-            onClose()
           })
-      : favoriteService
-          .createFavorite({
+      : createFavoriteMutation({
+          variables: {
             userId: user.userId,
             postId,
-          })
+          },
+        })
           .then(() => {
-            onClose()
             router.refresh()
           })
           .catch((e) => {
-            onClose()
             console.error(e)
           })
   }
+  // const handleClick = (e: React.MouseEvent) => {
+  //   e.stopPropagation()
+  //   if (!user?.userId || !postId) {
+  //     alertService.error('Please login')
+  //     return
+  //   }
+  //   // onOpen()
+  //   likedPost?.id
+  //     ? favoriteService
+  //       .deleteFavorite(likedPost.id)
+  //       .then(() => {
+  //         onClose()
+  //         router.refresh()
+  //       })
+  //       .catch((e) => {
+  //         console.error(e)
+  //         onClose()
+  //       })
+  //     : favoriteService
+  //       .createFavorite({
+  //         userId: user.userId,
+  //         postId,
+  //       })
+  //       .then(() => {
+  //         onClose()
+  //         router.refresh()
+  //       })
+  //       .catch((e) => {
+  //         onClose()
+  //         console.error(e)
+  //       })
+  // }
 
   const Icon = likedPost ? HeartIconSolid : HeartIcon
   return (
@@ -72,7 +111,7 @@ const LikeButton = ({ postId, likes }: Props) => {
     >
       <button
         onClick={handleClick}
-        disabled={loading}
+        disabled={loading || unLikeLoading}
         aria-label={'like'}
         title={'like'}
       >

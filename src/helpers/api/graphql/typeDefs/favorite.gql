@@ -1,0 +1,12 @@
+type FavoritePostByUser {
+    id: ID
+    createdAt: Date
+    updatedAt: Date
+    userId: ID
+    postId: ID
+}
+
+type Mutation {
+    deleteFavorite(id:ID!): FavoritePostByUser!
+    createFavorite(userId: ID!, postId: ID!): FavoritePostByUser!
+}

@@ -36,7 +36,6 @@ const calculatePostPopularity = async (post: Post): Promise<number> => {
 
 const generatePostsResponse = async (posts: Post[]) => {
   const newPosts: Post[] = []
-
   for (const post of posts) {
     const popularity = await calculatePostPopularity(post)
     if (post?.image) {
