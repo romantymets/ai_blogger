@@ -1,7 +1,15 @@
+import { Comment } from '@/models/commentsModel'
+
 export interface PostAuthor {
   id: string
   userName: string
   image?: string
+}
+
+export interface LikeItem {
+  postId: string
+  id: string
+  userId: string
 }
 
 export interface Post {
@@ -13,7 +21,9 @@ export interface Post {
   author: PostAuthor
   authorId: string
   createdAt: Date
-  comments: any[]
+  comments: Comment[] | []
+  likes: LikeItem[] | []
+  popularity?: number
 }
 
 export interface RecentPost {

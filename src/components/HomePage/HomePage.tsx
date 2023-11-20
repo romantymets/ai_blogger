@@ -31,7 +31,7 @@ const HomePage = ({ posts, total, page, searchData, sortOrder }: HomeProps) => {
           }
         >
           <Search searchData={searchData} />
-          <SortsLit href={HOME.href} currentOrder={sortOrder} />
+          <SortsLit href={HOME.href} currentOrder={sortOrder} page={page} />
           {posts?.length > 0 ? (
             <PostsList posts={posts} />
           ) : (
@@ -43,6 +43,7 @@ const HomePage = ({ posts, total, page, searchData, sortOrder }: HomeProps) => {
             <Pagination
               total={total}
               page={page}
+              sortOrder={sortOrder}
               postsLength={posts?.length}
               href={HOME.href}
             />

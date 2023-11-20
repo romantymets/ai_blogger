@@ -1,7 +1,8 @@
 'use client'
-import React, { Fragment, useState } from 'react'
+import React, { Fragment } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 import AuthGuard from '@/guards/AuthGuard'
 
@@ -12,7 +13,7 @@ import useImageUpload from '@/hooks/useImageUpload'
 import Hero from '@/components/Hero'
 
 import { alertService } from '@/services/alerts-service'
-import { postsService } from '@/services/posts.service'
+// import { postsService } from '@/services/posts.service'
 
 import { HOME } from '@/constants/navigationLinks'
 
@@ -29,8 +30,8 @@ import defImage from 'public/postHero.jpg'
 
 import { Post } from '@/models/postsModel'
 import { revalidateService } from '@/services/revalidate.service'
-import { yupResolver } from '@hookform/resolvers/yup'
 import { postValidationSchema } from '@/helpers/validationSchema/postValidationSchema'
+import { useUpdatePostMutation, useDeletePostsMutation } from '@/gql/graphql'
 
 interface IDefaultValues {
   title: string
@@ -39,9 +40,13 @@ interface IDefaultValues {
 }
 
 const EditPostPage = ({ post }: { post: Post }) => {
-  const [loading, setLoading] = useState<boolean>(false)
+  // const [loading, setLoading] = useState<boolean>(false)
 
   const { open, onOpen, onClose, cancelButtonRef } = useModal()
+
+  const [updatePostMutation, { loading }] = useUpdatePostMutation()
+  const [deletePostsMutation, { loading: deleteLoading }] =
+    useDeletePostsMutation()
 
   const handleOpenModal = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
@@ -87,45 +92,88 @@ const EditPostPage = ({ post }: { post: Post }) => {
       alertService.error('Author not found')
       return
     }
-    const formData = new FormData()
-
-    formData.append('title', data.title)
-
-    formData.append('subtitle', data.subtitle)
-
-    formData.append('content', data.content)
-
-    if (selectedImage) {
-      formData.append('image', selectedImage)
-    }
-    setLoading(true)
-    postsService
-      .updatePost(post.id, formData)
+    updatePostMutation({
+      variables: {
+        postInput: {
+          content: data.content,
+          subtitle: data.subtitle,
+          title: data.title,
+          id: post.id,
+        },
+        ...(selectedImage && { image: selectedImage }),
+      },
+    })
       .then(() => {
         alertService.success('Post was successful updated')
-        setLoading(false)
         router.push(HOME.href)
       })
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Update failed')
-        setLoading(false)
-      })
-      .finally(() => {
-        setLoading(false)
       })
   }
 
+  // const onSubmit = (data: IDefaultValues) => {
+  //   if (!user?.userId) {
+  //     alertService.error('Author not found')
+  //     return
+  //   }
+  //   const formData = new FormData()
+  //
+  //   formData.append('title', data.title)
+  //
+  //   formData.append('subtitle', data.subtitle)
+  //
+  //   formData.append('content', data.content)
+  //
+  //   if (selectedImage) {
+  //     formData.append('image', selectedImage)
+  //   }
+  //   setLoading(true)
+  //   postsService
+  //     .updatePost(post.id, formData)
+  //     .then(() => {
+  //       alertService.success('Post was successful updated')
+  //       setLoading(false)
+  //       router.push(HOME.href)
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Update failed')
+  //       setLoading(false)
+  //     })
+  //     .finally(() => {
+  //       setLoading(false)
+  //     })
+  // }
+
   const [title, subtitle] = watch(['title', 'subtitle'] as any)
 
+  // const handleDelete = () => {
+  //   onClose()
+  //   postsService
+  //     .deletePost(post.id)
+  //     .then(() => {
+  //       alertService.success('Post was successful deleted')
+  //       revalidateService.revalidate(HOME.href).then(() => {
+  //         router.push(HOME.href)
+  //       })
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Deleted failed')
+  //     })
+  //     .finally(() => {})
+  // }
+
   const handleDelete = () => {
-    setLoading(true)
-    onClose()
-    postsService
-      .deletePost(post.id)
+    deletePostsMutation({
+      variables: {
+        id: post.id,
+      },
+    })
       .then(() => {
         alertService.success('Post was successful deleted')
-        setLoading(false)
         revalidateService.revalidate(HOME.href).then(() => {
           router.push(HOME.href)
         })
@@ -133,10 +181,6 @@ const EditPostPage = ({ post }: { post: Post }) => {
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Deleted failed')
-        setLoading(false)
-      })
-      .finally(() => {
-        setLoading(false)
       })
   }
 
@@ -212,8 +256,8 @@ const EditPostPage = ({ post }: { post: Post }) => {
                 />
                 <RedButton
                   title={'Delete'}
-                  disabled={loading}
-                  loading={loading}
+                  disabled={deleteLoading}
+                  loading={deleteLoading}
                   onClick={handleOpenModal}
                 />
               </div>

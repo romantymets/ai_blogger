@@ -9,10 +9,10 @@ import Image from 'next/image'
 
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 
-import { userService } from '@/services/user.service'
+// import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
-import useToggle from '@/hooks/useToggle'
+// import useToggle from '@/hooks/useToggle'
 import useImageUpload from '@/hooks/useImageUpload'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
@@ -25,6 +25,7 @@ import {
   RegistrationCredential,
   registrationValidationSchema,
 } from '@/helpers/validationSchema/registrationValidationSchema'
+import { useRegistrationMutation } from '@/gql/graphql'
 
 const SignUpPage = () => {
   const {
@@ -37,7 +38,9 @@ const SignUpPage = () => {
     dragActive,
   } = useImageUpload()
 
-  const { open: loading, onOpen, onClose } = useToggle()
+  // const { open: loading, onOpen, onClose } = useToggle()
+
+  const [registrationMutation, { loading }] = useRegistrationMutation()
 
   const router = useRouter()
 
@@ -51,31 +54,55 @@ const SignUpPage = () => {
   })
 
   const onSubmit = (data: RegistrationCredential) => {
-    onOpen()
-    const formData = new FormData()
-    formData.append('userName', data.userName)
-    formData.append('email', data.email)
-    formData.append('password', data.password)
-    formData.append('aboutUser', data.aboutUser)
-    if (selectedImage) {
-      formData.append('image', selectedImage)
-    }
-    userService
-      .register(formData)
-      .then(() => {
+    registrationMutation({
+      variables: {
+        userInput: {
+          userName: data.userName,
+          aboutUser: data.aboutUser,
+          password: data.password,
+          email: data.email,
+        },
+        ...(selectedImage && { image: selectedImage }),
+      },
+    })
+      .then(({ data }) => {
         alertService.success('Registration successful')
-        onClose()
         router.push(LOG_IN.href)
       })
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Registration failed')
-        onClose()
-      })
-      .finally(() => {
-        onClose()
       })
   }
+
+  // REST example
+
+  // const onSubmit = (data: RegistrationCredential) => {
+  //   onOpen()
+  //   const formData = new FormData()
+  //   formData.append('userName', data.userName)
+  //   formData.append('email', data.email)
+  //   formData.append('password', data.password)
+  //   formData.append('aboutUser', data.aboutUser)
+  //   if (selectedImage) {
+  //     formData.append('image', selectedImage)
+  //   }
+  //   userService
+  //     .register(formData)
+  //     .then(() => {
+  //       alertService.success('Registration successful')
+  //       onClose()
+  //       router.push(LOG_IN.href)
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Registration failed')
+  //       onClose()
+  //     })
+  //     .finally(() => {
+  //       onClose()
+  //     })
+  // }
 
   return (
     <form className="my-8" onSubmit={handleSubmit(onSubmit)}>

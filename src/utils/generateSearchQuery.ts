@@ -30,6 +30,7 @@ export const generateSearchQuery = (search: string) => {
     include: {
       author: true,
       comments: true,
+      likes: true,
     },
     orderBy: [{ createdAt: 'desc' }],
   }

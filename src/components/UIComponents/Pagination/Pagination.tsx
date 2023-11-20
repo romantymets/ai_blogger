@@ -6,6 +6,7 @@ interface IPagination {
   total?: number
   href: string
   postsLength?: number
+  sortOrder?: string
 }
 
 const btnClassName =
@@ -16,6 +17,7 @@ const Pagination = ({
   total = 0,
   href,
   postsLength = 0,
+  sortOrder,
 }: IPagination) => {
   const currentPage = Number(page)
   const isLastPage = postsLength < POST_LIMIT
@@ -44,6 +46,7 @@ const Pagination = ({
                 pathname: href,
                 query: {
                   page: currentPage - 1,
+                  ...{ ...(sortOrder && { sortOrder }) },
                 },
               }}
               replace
@@ -65,6 +68,7 @@ const Pagination = ({
                 pathname: href,
                 query: {
                   page: currentPage + 1,
+                  ...{ ...(sortOrder && { sortOrder }) },
                 },
               }}
               replace

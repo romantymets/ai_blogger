@@ -16,9 +16,11 @@ const orderData = [newest, mostPopular]
 const SortsLit = ({
   href,
   currentOrder = newest.key,
+  page,
 }: {
   href: string
   currentOrder: string
+  page?: number
 }) => {
   return (
     <section
@@ -38,6 +40,7 @@ const SortsLit = ({
             pathname: href,
             query: {
               sortOrder: key,
+              ...{ ...(page && { page }) },
             },
           }}
           replace

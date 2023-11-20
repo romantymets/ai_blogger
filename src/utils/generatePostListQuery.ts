@@ -9,7 +9,8 @@ export const generatePostListQuery = (page?: number, sortOrder?: string) => {
     include: {
       author: true,
       comments: true,
+      likes: true,
     },
-    orderBy: [orderBy],
+    orderBy,
   }
 }

@@ -43,10 +43,10 @@ const Search = ({ searchData }: ISearchProps) => {
   return (
     <div
       id={'search'}
-      className="w-full z-10 search-container relative max-w-2xl mb-10"
+      className="w-full search-container relative max-w-2xl mb-10"
       ref={searchRef}
     >
-      <div className="relative z-10 min-h-[54px]">
+      <div className="relative min-h-[54px]">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
           <svg
             aria-hidden="true"
