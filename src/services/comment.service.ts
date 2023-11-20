@@ -1,9 +1,9 @@
 import { fetchWrapper } from '@/helpers/fetch-wrapper'
-import { CreateCommentCredential } from '@/models/commentsModel'
+import { CommentCredential } from '@/helpers/validationSchema/commentValidationSchema'
 
 export const baseCommentsUrl = '/api/comments'
 
-const createComment = async (data: CreateCommentCredential) =>
+const createComment = async (data: CommentCredential) =>
   await fetchWrapper.post(`${baseCommentsUrl}`, data, {
     next: { revalidate: 2 },
   })

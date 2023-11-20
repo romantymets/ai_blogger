@@ -4,6 +4,8 @@ import { saveS3Image } from '@/helpers/api/aws'
 import { createPost } from '@/helpers/api/service/post-service'
 import { generateErrorResponse } from '@/utils/generateErrorResponse'
 import { generateResponse } from '@/utils/generateResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { postValidationSchema } from '@/helpers/validationSchema/postValidationSchema'
 
 /**
  * @swagger
@@ -18,14 +20,12 @@ import { generateResponse } from '@/utils/generateResponse'
  *              schema:
  *               title: string
  *               content: string
- *               userId: string
  *               image?: file
  *               subtitle?: string
  *              example:
  *               title: test post title
  *               subtitle: some subtitle
  *               content: some article
- *               userId: 123
  *               image?: some image
  *      responses:
  *        '200':
@@ -47,12 +47,24 @@ import { generateResponse } from '@/utils/generateResponse'
  */
 export async function POST(request: NextRequest) {
   try {
-    const formData = await request.formData()
-    const image = formData.get('image') as Blob | null
-    const title = formData.get('title') as string | ''
-    const subtitle = formData.get('subtitle') as string | ''
-    const userId = formData.get('userId') as string | ''
-    const content = formData.get('content') as string | ''
+    const userId = request.cookies.get('userId' as any)
+
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, postValidationSchema)
+
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
+      })
+    }
+
+    const { title, content, subtitle, image = null } = data
 
     const fileName = await saveS3Image(image, {
       width: 1440,
@@ -60,7 +72,7 @@ export async function POST(request: NextRequest) {
     })
 
     const postData = await createPost({
-      id: userId,
+      id: userId.value,
       title,
       content,
       subtitle,

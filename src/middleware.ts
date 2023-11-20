@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { validateAccessToken } from '@/helpers/api/service/token-service'
 
-import { CookiesCredential, setCookies } from '@/utils/generateResponse'
+import { CookiesCredential, setCookiesByRes } from '@/utils/generateResponse'
 
 const generateNewTokens = async (cookie: CookiesCredential) => {
   return await fetch(`${process.env.CANONICAL_URL}/api/auth/refresh`, {
@@ -44,6 +44,7 @@ export async function middleware(request: NextRequest) {
   const isAssesTokenValid = await validateAccessToken(
     accessToken?.value as string
   )
+
   if (!isAssesTokenValid) {
     const refreshData = await getNewTokensData({
       refreshToken: refreshToken?.value,
@@ -54,7 +55,7 @@ export async function middleware(request: NextRequest) {
       return authenticationFailedResponse
     } else {
       const response = NextResponse.next()
-      setCookies(response, {
+      setCookiesByRes(response, {
         accessToken: refreshData.accessToken,
         refreshToken: refreshData.refreshToken,
         userId: refreshData.userId,
@@ -66,5 +67,10 @@ export async function middleware(request: NextRequest) {
 
 // Limit the middleware to paths starting with `/api/`
 export const config = {
-  matcher: ['/api/users/:path*', '/api/posts/:path*', '/api/comments/:path*'],
+  matcher: [
+    '/api/users/:path*',
+    '/api/posts/:path*',
+    '/api/comments/:path*',
+    '/api/favorite/:path*',
+  ],
 }

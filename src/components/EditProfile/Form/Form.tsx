@@ -1,10 +1,10 @@
 'use client'
-import React, { Fragment, useEffect, useState } from 'react'
+import React, { Fragment, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
-import { userService } from '@/services/user.service'
+import { saveUser, userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
 import useModal from '@/hooks/useModal'
@@ -20,6 +20,9 @@ import DeleteUserComponent from '@/components/EditProfile/Form/DeleteUserCompone
 import UploadImage from '@/components/UIComponents/UploadImage/UploadImage'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
 import { IEditUserData } from '@/components/EditProfile/EditProfileComponent'
+import { useUpdateUserMutation, useDeleteUserMutation } from '@/gql/graphql'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { updateUserValidationSchema } from '@/helpers/validationSchema/updateUserValidationSchema'
 
 interface IDefaultValues {
   userName: string
@@ -36,7 +39,12 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
     handleDrop,
     dragActive,
   } = useImageUpload()
-  const [loading, setLoading] = useState<boolean>(false)
+  // const [loading, setLoading] = useState<boolean>(false)
+  const [updateUserMutation, { loading }] = useUpdateUserMutation()
+
+  const [deleteUserMutation, { loading: deleteUserLoading }] =
+    useDeleteUserMutation()
+
   const { open, onOpen, onClose, cancelButtonRef } = useModal()
 
   const handleOpenModal = (
@@ -48,12 +56,6 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
 
   const router = useRouter()
 
-  const defaultValues: IDefaultValues = {
-    userName: '',
-    aboutUser: '',
-    image: '',
-  }
-
   const {
     register,
     handleSubmit,
@@ -61,54 +63,46 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
     setValue,
     formState: { errors },
   } = useForm({
-    defaultValues,
+    resolver: yupResolver(updateUserValidationSchema),
     mode: 'onBlur',
   })
 
   const onSubmit = (data: IDefaultValues) => {
-    setLoading(true)
-    const formData = new FormData()
-
-    formData.append('aboutUser', data.aboutUser)
-
-    formData.append('userName', data.userName)
-
-    if (selectedImage) {
-      formData.append('image', selectedImage)
-    }
-    userService
-      .updateUser(id, formData)
-      .then(() => {
+    updateUserMutation({
+      variables: {
+        userId: id,
+        userInput: {
+          userName: data.userName,
+          aboutUser: data.aboutUser,
+        },
+        ...(selectedImage && { image: selectedImage }),
+      },
+    })
+      .then(({ data }) => {
+        saveUser(data?.updateUser)
         alertService.success('User was successful updated')
-        setLoading(false)
       })
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Updated failed')
-        setLoading(false)
-      })
-      .finally(() => {
-        setLoading(false)
       })
   }
 
   const handleDeleteUser = () => {
-    setLoading(true)
     onClose()
-    userService
-      .deleteUser(id)
+    deleteUserMutation({
+      variables: {
+        userId: id,
+      },
+    })
       .then(() => {
         alertService.success('User was successful deleted')
-        setLoading(false)
+        userService.logout()
         router.push(HOME.href)
       })
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Deleted failed')
-        setLoading(false)
-      })
-      .finally(() => {
-        setLoading(false)
       })
   }
 
@@ -122,7 +116,54 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
     }
   }, [data, setValue])
 
-  const [image] = watch(['image'])
+  // const onSubmit = (data: IDefaultValues) => {
+  //   setLoading(true)
+  //   const formData = new FormData()
+  //
+  //   formData.append('aboutUser', data.aboutUser)
+  //
+  //   formData.append('userName', data.userName)
+  //
+  //   if (selectedImage) {
+  //     formData.append('image', selectedImage)
+  //   }
+  //   userService
+  //     .updateUser(id, formData)
+  //     .then(() => {
+  //       alertService.success('User was successful updated')
+  //       setLoading(false)
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Updated failed')
+  //       setLoading(false)
+  //     })
+  //     .finally(() => {
+  //       setLoading(false)
+  //     })
+  // }
+
+  // const handleDeleteUser = () => {
+  //   setLoading(true)
+  //   onClose()
+  //   userService
+  //     .deleteUser(id)
+  //     .then(() => {
+  //       alertService.success('User was successful deleted')
+  //       setLoading(false)
+  //       router.push(HOME.href)
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Deleted failed')
+  //       setLoading(false)
+  //     })
+  //     .finally(() => {
+  //       setLoading(false)
+  //     })
+  // }
+
+  const [image] = watch(['image' as any])
 
   return (
     <Fragment>
@@ -162,7 +203,7 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
                   type={'text'}
                   label={'User Name'}
                   error={Boolean(errors.userName)}
-                  helperText={errors.userName?.message}
+                  helperText={errors.userName?.message as string}
                   register={register('userName', {
                     required: 'User Name is required',
                   })}
@@ -206,8 +247,8 @@ const Form = ({ data, id }: { data: IEditUserData | null; id: string }) => {
               />
               <RedButton
                 title={'Delete'}
-                disabled={loading}
-                loading={loading}
+                disabled={deleteUserLoading}
+                loading={deleteUserLoading}
                 onClick={handleOpenModal}
               />
             </div>

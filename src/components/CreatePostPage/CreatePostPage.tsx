@@ -6,13 +6,13 @@ import { useRouter } from 'next/navigation'
 import AuthGuard from '@/guards/AuthGuard'
 
 import useGetUser from '@/hooks/useGetUser'
-import useToggle from '@/hooks/useToggle'
+// import useToggle from '@/hooks/useToggle'
 import useImageUpload from '@/hooks/useImageUpload'
 
 import Hero from '@/components/Hero'
 
 import { alertService } from '@/services/alerts-service'
-import { postsService } from '@/services/posts.service'
+// import { postsService } from '@/services/posts.service'
 
 import { CREATE_POST, HOME } from '@/constants/navigationLinks'
 
@@ -23,6 +23,9 @@ import TextArea from '@/components/UIComponents/Inputs/TextArea'
 
 import defImage from 'public/postHero.jpg'
 import HeroContent from '@/components/CreatePostPage/HeroContent'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { postValidationSchema } from '@/helpers/validationSchema/postValidationSchema'
+import { useCreatePostMutation } from '@/gql/graphql'
 
 interface IDefaultValues {
   title: string
@@ -44,12 +47,15 @@ const CreatePostPage = () => {
     handleDrop,
     dragActive,
   } = useImageUpload()
-  const { open: loading, onOpen, onClose } = useToggle()
+  // const { open: loading, onOpen, onClose } = useToggle()
 
-  const defaultValues: IDefaultValues = {
+  const [createPostMutation, { loading }] = useCreatePostMutation()
+
+  const defaultValues = {
     title: '',
     content: '',
     subtitle: '',
+    image: null,
   }
 
   const {
@@ -59,46 +65,72 @@ const CreatePostPage = () => {
     formState: { errors },
   } = useForm({
     defaultValues,
+    resolver: yupResolver(postValidationSchema),
     mode: 'onBlur',
   })
 
   const onSubmit = (data: IDefaultValues) => {
     if (!user?.userId) {
-      alertService.error('Updated not found')
+      alertService.error('User not found')
       return
     }
-    const formData = new FormData()
 
-    formData.append('title', data.title)
-
-    formData.append('subtitle', data.subtitle)
-
-    formData.append('content', data.content)
-
-    formData.append('userId', user.userId)
-
-    if (selectedImage) {
-      formData.append('image', selectedImage)
-    }
-    onOpen()
-    postsService
-      .create(formData)
+    createPostMutation({
+      variables: {
+        postInput: {
+          id: user.userId,
+          subtitle: data.subtitle,
+          title: data.title,
+          content: data.content,
+        },
+        ...(selectedImage && { image: selectedImage }),
+      },
+    })
       .then(() => {
         alertService.success('Post was successful created')
-        onClose()
         router.push(HOME.href)
       })
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Created failed')
-        onClose()
-      })
-      .finally(() => {
-        onClose()
       })
   }
 
-  const [title, subtitle] = watch(['title', 'subtitle'])
+  // const onSubmit = (data: IDefaultValues) => {
+  //   if (!user?.userId) {
+  //     alertService.error('User not found')
+  //     return
+  //   }
+  //   const formData = new FormData()
+  //
+  //   formData.append('title', data.title)
+  //
+  //   formData.append('subtitle', data.subtitle)
+  //
+  //   formData.append('content', data.content)
+  //
+  //   if (selectedImage) {
+  //     formData.append('image', selectedImage)
+  //   }
+  //   onOpen()
+  //   postsService
+  //     .create(formData)
+  //     .then(() => {
+  //       alertService.success('Post was successful created')
+  //       onClose()
+  //       router.push(HOME.href)
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Created failed')
+  //       onClose()
+  //     })
+  //     .finally(() => {
+  //       onClose()
+  //     })
+  // }
+
+  const [title, subtitle] = watch(['title', 'subtitle'] as any)
 
   return (
     <AuthGuard>
@@ -124,10 +156,8 @@ const CreatePostPage = () => {
                     type={'text'}
                     label={'Title'}
                     error={Boolean(errors.title)}
-                    helperText={errors.title?.message}
-                    register={register('title', {
-                      required: 'Title is required',
-                    })}
+                    helperText={errors.title?.message as string}
+                    register={register('title')}
                   />
                 </div>
 
@@ -152,10 +182,8 @@ const CreatePostPage = () => {
                     autoComplete={'content'}
                     rows={15}
                     error={Boolean(errors.content)}
-                    helperText={errors.content?.message}
-                    register={register('content', {
-                      required: 'Article is required',
-                    })}
+                    helperText={errors.content?.message as string}
+                    register={register('content')}
                   />
                 </div>
 

@@ -1,0 +1,170 @@
+# This file was generated. Do not edit manually.
+
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type AuthorPayload {
+    aboutUser: String
+    image: String
+    userName: String
+}
+
+type Comment {
+    author: User
+    authorId: ID
+    content: String
+    createdAt: Date
+    id: ID
+    post: Post
+    postId: ID
+    updatedAt: Date
+}
+
+type CommentPayload {
+    authorId: ID
+    content: String
+    createdAt: Date
+    id: ID
+    postId: ID
+    updatedAt: Date
+}
+
+type CommentsByPost {
+    author: AuthorPayload
+    authorId: ID
+    content: String
+    createdAt: Date
+    id: ID
+    postId: ID
+    updatedAt: Date
+}
+
+type FavoritePostByUser {
+    createdAt: Date
+    id: ID
+    postId: ID
+    updatedAt: Date
+    userId: ID
+}
+
+type Logout {
+    success: Boolean
+}
+
+type Mutation {
+    createComment(input: CreateCommentInput!): CommentPayload!
+    createFavorite(postId: ID!, userId: ID!): FavoritePostByUser!
+    createPost(image: File, input: CreatePostInput!): Post!
+    deleteComment(id: ID!): CommentPayload!
+    deleteFavorite(id: ID!): FavoritePostByUser!
+    deletePost(id: ID!): Post!
+    deleteUser(id: String!): User!
+    login(email: String!, password: String!): UserPayload
+    logout: Logout
+    registration(image: File, input: RegistrationInput!): UserPayload
+    resetPassword(confirmPassword: String!, email: String!, password: String!): UserPayload
+    updatePost(image: File, input: UpdatePostInput!): Post!
+    updateUser(id: String!, image: File, input: UpdateUserInput!): UserPayload!
+}
+
+type Post {
+    author: AuthorPayload
+    authorId: ID!
+    comments: [CommentPayload]
+    content: String!
+    createdAt: Date!
+    id: ID!
+    image: String
+    likes: [FavoritePostByUser]
+    popularity: Float
+    subtitle: String
+    title: String!
+    updatedAt: Date!
+}
+
+type PostList {
+    posts: [Post]
+    total: String
+}
+
+type Query {
+    getAllUsers: [User!]!
+    getCommentsByPost(id: ID!): [CommentsByPost]
+    getPost(id: ID!): Post
+    getPosts(page: String, sortOrder: String): PostList
+    getResentPosts(id: ID!): [ResentPost]
+    getSearchPosts(search: String!): PostList
+    getUser(id: String!): UserPayload!
+}
+
+type ResentPost {
+    authorId: ID!
+    content: String!
+    createdAt: Date!
+    id: ID!
+    image: String
+    subtitle: String
+    title: String!
+    updatedAt: Date!
+}
+
+type User {
+    aboutUser: String
+    comments: [Comment]
+    createdAt: Date
+    email: String!
+    favoritePosts: [FavoritePostByUser]
+    id: ID!
+    image: String
+    password: String
+    posts: [Post!]!
+    updatedAt: Date
+    userName: String!
+}
+
+type UserPayload {
+    aboutUser: String
+    email: String!
+    image: String
+    userId: String!
+    userName: String!
+}
+
+scalar Date
+
+scalar File
+
+input CreateCommentInput {
+    authorId: ID!
+    comment: String!
+    postId: ID!
+}
+
+input CreatePostInput {
+    content: String!
+    id: ID!
+    subtitle: String
+    title: String!
+}
+
+input RegistrationInput {
+    aboutUser: String
+    email: String!
+    image: File
+    password: String!
+    userName: String!
+}
+
+input UpdatePostInput {
+    content: String
+    id: ID!
+    subtitle: String
+    title: String
+}
+
+input UpdateUserInput {
+    aboutUser: String
+    userName: String!
+}
