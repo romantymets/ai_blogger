@@ -4,9 +4,9 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 
-import useToggle from '@/hooks/useToggle'
-
-import { userService } from '@/services/user.service'
+// import useToggle from '@/hooks/useToggle'
+//
+// import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
 import { HOME, SIGN_UP, RESET_PASSWORD } from '@/constants/navigationLinks'
@@ -19,10 +19,14 @@ import {
   LoginCredential,
   loginValidationSchema,
 } from '@/helpers/validationSchema/loginValidationSchema'
+import { useLoginMutation } from '@/gql/graphql'
+import { saveUser } from '@/services/user.service'
 
 const LoginPage = () => {
   const router = useRouter()
-  const { open: loading, onOpen, onClose } = useToggle()
+  // const { open: loading, onOpen, onClose } = useToggle()
+
+  const [loginMutation, { loading }] = useLoginMutation()
 
   const defaultValues = {
     email: '',
@@ -40,20 +44,38 @@ const LoginPage = () => {
   })
 
   const onSubmit = (data: LoginCredential) => {
-    onOpen()
-    return userService
-      .login(data)
-      .then(() => {
+    return loginMutation({
+      variables: {
+        email: data.email,
+        password: data.password,
+      },
+    })
+      .then(({ data }) => {
+        saveUser(data.login)
         alertService.success('Authorization successful')
-        onClose()
         router.push(HOME.href)
       })
       .catch((e) => {
         console.error(e)
         alertService.error(e.message)
-        onClose()
       })
   }
+
+  // const onSubmit = (data: LoginCredential) => {
+  //   onOpen()
+  //   return userService
+  //     .login(data)
+  //     .then(() => {
+  //       alertService.success('Authorization successful')
+  //       onClose()
+  //       router.push(HOME.href)
+  //     })
+  //     .catch((e) => {
+  //       console.error(e)
+  //       alertService.error(e.message)
+  //       onClose()
+  //     })
+  // }
 
   return (
     <Fragment>
