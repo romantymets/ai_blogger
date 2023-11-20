@@ -1,5 +1,6 @@
 'use client'
 import { Fragment, useEffect, useState } from 'react'
+import get from 'lodash/get'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -20,28 +21,53 @@ import useGetUser from '@/hooks/useGetUser'
 
 import { userService } from '@/services/user.service'
 import { useRouter } from 'next/navigation'
+import { useGetUserLazyQuery } from '@/gql/graphql'
+
+export const dynamic = 'force-dynamic'
 
 const Profile = () => {
   const [userImage, setUserImage] = useState<string | null>(null)
   const { user } = useGetUser()
   const router = useRouter()
 
+  const [getUserQuery] = useGetUserLazyQuery()
+
+  // example REST Api
+  // useEffect(() => {
+  //   if (user?.userId) {
+  //     userService
+  //       .getUserById(user.userId)
+  //       .then(({ data }) => {
+  //         if (data?.image) {
+  //           setUserImage(data.image)
+  //         }
+  //       })
+  //       .catch((error) => {
+  //         console.error(error)
+  //       })
+  //   } else {
+  //     setUserImage(null)
+  //   }
+  // }, [user])
+
   useEffect(() => {
     if (user?.userId) {
-      userService
-        .getUserById(user.userId)
+      getUserQuery({
+        variables: {
+          userId: user?.userId,
+        },
+      })
         .then(({ data }) => {
-          if (data?.image) {
-            setUserImage(data.image)
-          }
+          const imageUrl = get(data, 'getUser.image', null)
+          setUserImage(imageUrl)
         })
         .catch((error) => {
-          console.error(error)
+          console.log(error)
         })
     } else {
       setUserImage(null)
     }
-  }, [user])
+  }, [user?.userId])
 
   const handleLogOut = () => {
     userService.logout().then(() => {

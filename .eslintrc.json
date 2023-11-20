@@ -24,6 +24,14 @@
         "**/?(*.)+(spec|tests).[jt]s?(x)"
       ],
       "extends": ["plugin:testing-library/react"]
+    },
+    {
+      "files": ["*.gql"],
+      "parser": "@graphql-eslint/eslint-plugin",
+      "plugins": ["@graphql-eslint"],
+      "rules": {
+        "@graphql-eslint/known-type-names": "error"
+      }
     }
   ],
   "parserOptions": {
@@ -33,6 +41,7 @@
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
+  "ignorePatterns": ["graphql.tsx"],
   "rules": {
     "no-unused-vars": "off",
     "react/react-in-jsx-scope": "off",

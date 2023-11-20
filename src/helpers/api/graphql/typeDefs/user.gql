@@ -1,0 +1,37 @@
+scalar Date
+
+type AuthorPayload {
+    userName: String
+    image: String
+    aboutUser: String
+}
+
+type User {
+    id: ID!
+    email: String!
+    userName: String!
+    image: String
+    aboutUser: String
+    password: String
+    posts: [Post!]!
+    createdAt: Date
+    updatedAt: Date
+    comments: [Comment]
+    favoritePosts: [FavoritePostByUser]
+}
+
+input UpdateUserInput {
+    userName: String!
+    aboutUser: String
+}
+
+
+type Query {
+    getAllUsers: [User!]!
+    getUser(id:String!): UserPayload!
+}
+
+type Mutation {
+    updateUser(id:String!, input: UpdateUserInput!, image: File): UserPayload!
+    deleteUser(id:String!): User!
+}

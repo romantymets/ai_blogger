@@ -20,7 +20,7 @@ export interface IUserValue {
 }
 
 export interface UpdateUserCredential {
-  userName: string
+  userName?: string
   aboutUser?: string
   image?: string
 }
