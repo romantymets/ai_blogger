@@ -16,13 +16,11 @@ export interface IUserValue {
   userName: string
   userId: string
   email: string
-  accessToken: string
-  refreshToken: string
   image?: string | null
 }
 
 export interface UpdateUserCredential {
-  userName: string
+  userName?: string
   aboutUser?: string
   image?: string
 }

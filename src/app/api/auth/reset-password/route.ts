@@ -3,7 +3,7 @@ import { resetPassword } from '@/helpers/api/service/auth-service'
 import { generateErrorResponse } from '@/utils/generateErrorResponse'
 import { generateResponse } from '@/utils/generateResponse'
 import { parseBody } from '@/helpers/api/middleware/parseBody'
-import { loginValidationSchema } from '@/helpers/validationSchema/loginValidationSchema'
+import { resetPasswordValidationSchema } from '@/helpers/validationSchema/resetPasswordValidationSchema'
 
 /**
  * @swagger
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       isValid,
       errors,
       data = {},
-    } = await parseBody(request, loginValidationSchema)
+    } = await parseBody(request, resetPasswordValidationSchema)
 
     if (!isValid && errors) {
       return generateErrorResponse({

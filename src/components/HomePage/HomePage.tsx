@@ -2,19 +2,23 @@ import Hero from '@/components/Hero'
 import HeroContent from '@/components/HomePage/HeroContent'
 import PostsList from '@/components/HomePage/PostsList'
 import Pagination from '@/components/UIComponents/Pagination'
-import { HOME } from '@/constants/navigationLinks'
 import Search from '@/components/HomePage/Search'
-import { Post } from '@/models/postsModel'
+import SortsLit from '@/components/HomePage/SortsList/SortsLit'
+
 import { POST_LIMIT } from '@/constants/pagination'
+import { HOME } from '@/constants/navigationLinks'
+
+import { Post } from '@/models/postsModel'
 
 interface HomeProps {
   posts?: Post[]
   searchData?: Post[]
   total: number
   page?: number
+  sortOrder?: string
 }
 
-const HomePage = ({ posts, total, page, searchData }: HomeProps) => {
+const HomePage = ({ posts, total, page, searchData, sortOrder }: HomeProps) => {
   return (
     <section>
       <Hero>
@@ -27,6 +31,7 @@ const HomePage = ({ posts, total, page, searchData }: HomeProps) => {
           }
         >
           <Search searchData={searchData} />
+          <SortsLit href={HOME.href} currentOrder={sortOrder} page={page} />
           {posts?.length > 0 ? (
             <PostsList posts={posts} />
           ) : (
@@ -38,6 +43,7 @@ const HomePage = ({ posts, total, page, searchData }: HomeProps) => {
             <Pagination
               total={total}
               page={page}
+              sortOrder={sortOrder}
               postsLength={posts?.length}
               href={HOME.href}
             />

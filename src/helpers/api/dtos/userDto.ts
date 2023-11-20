@@ -6,6 +6,7 @@ export const generateUserDto = async (user: User) => {
     email: user.email,
     userId: user.id,
     userName: user.userName,
+    aboutUser: user?.aboutUser,
     image: user?.image ? await generateImageUrl(user.image) : null,
   }
 }

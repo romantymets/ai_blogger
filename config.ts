@@ -28,7 +28,7 @@ module.exports = cleanEnv(process.env, {
   AWS_S3_BUCKET: str(),
   CANONICAL_URL: str(),
   NODE_ENV: str({
-    choices: ['development', 'production'],
+    choices: ['development', 'production', 'test'],
     default: 'production',
   }),
 })

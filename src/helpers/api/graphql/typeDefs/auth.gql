@@ -1,0 +1,31 @@
+scalar File
+
+type UserPayload {
+    email: String!,
+    userId: String!,
+    userName: String!,
+    image: String,
+    aboutUser: String
+}
+
+
+input RegistrationInput {
+    email: String!
+    password: String!
+    userName: String!
+    aboutUser: String
+    image: File
+}
+
+type Logout {
+    success: Boolean
+}
+
+
+type Mutation {
+    registration(input: RegistrationInput!, image: File): UserPayload
+    login(email: String!, password: String!): UserPayload
+    resetPassword( email: String!, password: String!, confirmPassword: String!): UserPayload
+    logout: Logout
+}
+
