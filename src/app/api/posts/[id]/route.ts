@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { deletePost, updatePost } from '@/helpers/api/service/post-service'
-import { uploadImageToS3 } from '@/helpers/api/aws'
-import { v4 as uuid } from 'uuid'
+import { saveS3Image } from '@/helpers/api/aws'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { generateResponse } from '@/utils/generateResponse'
+import { ParamsId } from '@/models/params'
+import { postValidationSchema } from '@/helpers/validationSchema/postValidationSchema'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
 
 /**
  * @swagger
  * /api/posts/id:
  *   delete:
  *      tags: [posts]
- *      summary: Delete single comment
- *      description: return deleted comment
+ *      summary: Delete single post
+ *      description: return deleted post
  *      responses:
  *        '200':
  *          description: OK
@@ -24,27 +28,12 @@ import { v4 as uuid } from 'uuid'
  *                 authorId: 23
  *                 postId: 12
  */
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
+export async function DELETE(request: Request, { params }: ParamsId) {
   try {
     const post = await deletePost(params.id)
-    return new NextResponse(JSON.stringify(post))
+    return generateResponse(post)
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }
 
@@ -90,28 +79,29 @@ export async function DELETE(
  *               authorId: ssdd89
  *               author: {id: 122, userName: ro, image: image || null}
  */
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function PUT(request: NextRequest, { params }: ParamsId) {
   try {
-    const formData = await request.formData()
-    const image = formData.get('image') as Blob | null
-    const title = formData.get('title') as string | ''
-    const subtitle = formData.get('subtitle') as string | ''
-    const content = formData.get('content') as string | ''
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, postValidationSchema)
 
-    let fileName
-    if (image) {
-      const mimeType = image.type
-      const fileExtension = mimeType.split('/')[1]
-
-      const buffer = Buffer.from(await image.arrayBuffer())
-      fileName = await uploadImageToS3(buffer, uuid(), fileExtension, {
-        width: 1440,
-        height: 800,
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
       })
     }
+
+    const { title, content, subtitle, image = null } = data
+
+    const fileName = await saveS3Image(image, {
+      width: 1440,
+      height: 800,
+    })
 
     const postData = await updatePost({
       id: params.id,
@@ -122,18 +112,6 @@ export async function PUT(
     })
     return new NextResponse(JSON.stringify(postData))
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

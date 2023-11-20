@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server'
 import { getAllUsers } from '@/helpers/api/service/user-service'
 import { generateImageUrl } from '@/helpers/api/aws'
+import { generateResponse } from '@/utils/generateResponse'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
 
 /**
  * @swagger
@@ -20,12 +21,9 @@ import { generateImageUrl } from '@/helpers/api/aws'
  *                 userName: string
  *                 image: string
  *                 aboutUser: string
- *                 hashedPassword: string
  *                 createdAt: string
  *                 updatedAt: string
- *                 favoriteIds: array
  *                 posts: array
- *                 account: array
  *                 comments: array
  *             example:
  *                 id: 1f
@@ -33,21 +31,21 @@ import { generateImageUrl } from '@/helpers/api/aws'
  *                 userName: test
  *                 image: http//image
  *                 aboutUser: about user
- *                 hashedPassword: 123d
  *                 createdAt: registration date
  *                 updatedAt: edit user date
- *                 favoriteIds: []
  *                 posts: []
- *                 account: []
  *                 comments: []
  */
 export async function GET() {
-  const users = await getAllUsers()
-  for (const user of users) {
-    if (user?.image) {
-      user.image = await generateImageUrl(user.image)
+  try {
+    const users = await getAllUsers()
+    for (const user of users) {
+      if (user?.image) {
+        user.image = await generateImageUrl(user.image)
+      }
     }
+    return generateResponse(users)
+  } catch (error) {
+    return generateErrorResponse(error)
   }
-
-  return NextResponse.json({ data: users })
 }

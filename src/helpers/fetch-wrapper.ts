@@ -1,15 +1,17 @@
-import { baseAuthUrl, saveUser, userService } from '@/services/user.service'
+import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
-import { LOG_IN } from '@/constants/navigationLinks'
-import { ApiError } from '@/helpers/api/exceptions/api-error'
-import Router from 'next/router'
 
-export const privateApi = ['/api/users', '/api/posts', '/api/comments']
+export const privateApi = [
+  '/api/users',
+  '/api/posts',
+  '/api/comments',
+  '/api/favorite',
+]
 
 interface RequestOptions {
   method: string
   headers: { Authorization: string } | HeadersInit
-  body?: string
+  body?: string | FormData
 }
 
 export const POST = 'POST'
@@ -25,21 +27,26 @@ export const fetchWrapper = {
 }
 
 function request(method: string) {
-  return async (url: string, body?: any, fetchOptions?: any) => {
+  return async (
+    url: string,
+    body?: Record<string, any>,
+    fetchOptions?: any
+  ) => {
     const requestOptions: RequestOptions = {
       method,
-      headers: authHeader(url),
+      headers: {},
+      credentials: 'include',
       ...fetchOptions,
     }
     if (body) {
       if (body instanceof FormData) {
-        requestOptions.body = body as any
+        requestOptions.body = body as FormData
       } else {
         requestOptions.headers['Content-Type'] = 'application/json'
         requestOptions.body = JSON.stringify(body)
       }
     }
-    let response = await fetch(url, requestOptions)
+    const response = await fetch(url, requestOptions)
     if (!response.ok) {
       const isPrivateApi = privateApi.find((el) => url.startsWith(el))
       const errorData = await response.json()
@@ -49,26 +56,10 @@ function request(method: string) {
         isPrivateApi
       ) {
         // auto refresh if 401 Unauthorized or 403 Forbidden response returned from api
-        try {
-          const refreshRes = await fetch(`${baseAuthUrl}/refresh`, {
-            method: 'POST',
-            headers: authHeader(`${baseAuthUrl}/refresh`),
-          })
-          if (!refreshRes.ok) {
-            const refreshErrorData = await refreshRes.json()
-            console.error(refreshErrorData)
-            throw ApiError.UnauthorizedError()
-          }
-          if (refreshRes.ok) {
-            const userData = await refreshRes.json()
-            saveUser(userData)
-            response = await fetch(url, requestOptions)
-          }
-        } catch (error) {
-          userService.logout()
-          alertService.error('Unauthorized')
-          await Router.push(LOG_IN.href)
-        }
+        await userService.logout()
+        alertService.error('Unauthorized')
+        const error = (response && errorData?.message) || response.statusText
+        return Promise.reject(new Error(error))
       } else {
         const error = (response && errorData?.message) || response.statusText
         return Promise.reject(new Error(error))
@@ -76,18 +67,4 @@ function request(method: string) {
     }
     return await response.json()
   }
-}
-
-function authHeader(url: string) {
-  // return auth header with jwt if user is logged in and request is to the api url
-  const user = userService.userValue
-  const isLoggedIn = user?.accessToken
-  const isApiUrl = privateApi.find((el) => url.startsWith(el))
-  if (isLoggedIn && isApiUrl) {
-    return { Authorization: `Bearer ${user.accessToken}` }
-  }
-  if (isLoggedIn && url.startsWith('/api/auth/refresh')) {
-    return { Authorization: `Bearer ${user.refreshToken}` }
-  }
-  return {}
 }

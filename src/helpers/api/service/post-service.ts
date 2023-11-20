@@ -5,8 +5,39 @@ import { CreatePostCredential } from '@/models/postsServiceModel'
 import { findUserById } from '@/helpers/api/service/user-service'
 import { Post } from '@/models/postsModel'
 
+export const getMaxPopularity = async (): Promise<number> => {
+  const commentsAndLikesCount = await prisma.post.findMany({
+    select: {
+      _count: {
+        select: {
+          comments: true,
+          likes: true,
+        },
+      },
+    },
+  })
+
+  return Math.max(
+    ...commentsAndLikesCount.map(
+      ({ _count }) => _count?.likes + _count?.comments * 2 || 0
+    )
+  )
+}
+
+const calculatePostPopularity = async (post: Post): Promise<number> => {
+  const maxPopularity = await getMaxPopularity()
+
+  const doubleCommentAndLike = post.likes.length + post.comments.length * 2 || 0
+
+  const popularity = (doubleCommentAndLike / maxPopularity) * 5
+
+  return Number(popularity.toFixed(2))
+}
+
 const generatePostsResponse = async (posts: Post[]) => {
+  const newPosts: Post[] = []
   for (const post of posts) {
+    const popularity = await calculatePostPopularity(post)
     if (post?.image) {
       post.image = await generateImageUrl(post.image)
     }
@@ -17,21 +48,24 @@ const generatePostsResponse = async (posts: Post[]) => {
         ? await generateImageUrl(post.author.image)
         : null,
     }
+    newPosts.push({ ...post, popularity })
   }
-  return posts
+
+  return newPosts
 }
 
 export const findPostById = async (id: string) => {
   if (!id) {
     throw new ApiError(500, 'Bad credential')
   }
-  const post = await prisma.posts.findUnique({
+  const post = await prisma.post.findUnique({
     where: {
       id,
     },
     include: {
       author: true,
       comments: true,
+      likes: true,
     },
   })
 
@@ -49,6 +83,7 @@ export const findPostById = async (id: string) => {
         ? await generateImageUrl(post.author.image)
         : null,
     },
+    popularity: await calculatePostPopularity(post),
   }
 }
 
@@ -68,7 +103,7 @@ export const createPost = async ({
     throw ApiError.BadRequest(`user with ${id} not exist`)
   }
 
-  return await prisma.posts.create({
+  return await prisma.post.create({
     data: {
       title,
       content,
@@ -86,7 +121,7 @@ export const deletePost = async (id: string) => {
     await deleteS3image(post.image)
   }
 
-  return await prisma.posts.delete({
+  return await prisma.post.delete({
     where: {
       id,
     },
@@ -95,8 +130,9 @@ export const deletePost = async (id: string) => {
 
 export const getAllPosts = async (query: any, countQuery = {}) => {
   try {
-    const total = await prisma.posts.count(countQuery)
-    const posts = await prisma.posts.findMany(query)
+    const total = await prisma.post.count(countQuery)
+
+    const posts = await prisma.post.findMany(query)
 
     const newPosts = await generatePostsResponse(posts)
 
@@ -108,7 +144,7 @@ export const getAllPosts = async (query: any, countQuery = {}) => {
 
 export const getResentPosts = async (id: string) => {
   try {
-    const posts = await prisma.posts.findMany({
+    const posts = await prisma.post.findMany({
       where: {
         NOT: {
           id,
@@ -131,7 +167,11 @@ export const getResentPosts = async (id: string) => {
 }
 
 export const updatePost = async (postData: CreatePostCredential) => {
-  const post = await findPostById(postData.id)
+  const post = await prisma.post.findUnique({
+    where: {
+      id: postData.id,
+    },
+  })
 
   if (postData?.image) {
     if (post?.image !== postData?.image) {
@@ -141,9 +181,9 @@ export const updatePost = async (postData: CreatePostCredential) => {
     }
   }
 
-  const updatedPost = await prisma.posts.update({
+  const updatedPost = await prisma.post.update({
     where: {
-      id: postData.id,
+      id: post.id,
     },
     include: {
       author: true,

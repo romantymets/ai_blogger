@@ -9,7 +9,7 @@ export const findCommentsById = async (id: string) => {
   if (!id) {
     throw new ApiError(500, 'Bad credential')
   }
-  const comment = await prisma.comments.findUnique({
+  const comment = await prisma.comment.findUnique({
     where: {
       id,
     },
@@ -57,7 +57,7 @@ export const createComment = async ({
     throw ApiError.BadRequest(`post with ${postId} not exist`)
   }
 
-  return await prisma.comments.create({
+  return await prisma.comment.create({
     data: {
       content: comment,
       authorId: user.id,
@@ -73,7 +73,7 @@ export const deleteComment = async (id: string) => {
     throw ApiError.BadRequest(`comment with ${id} not exist`)
   }
 
-  return await prisma.comments.delete({
+  return await prisma.comment.delete({
     where: {
       id: comment.id,
     },
@@ -82,7 +82,7 @@ export const deleteComment = async (id: string) => {
 
 export const getCommentsByPost = async (postId: string) => {
   try {
-    const comments = await prisma.comments.findMany({
+    const comments = await prisma.comment.findMany({
       where: {
         post: {
           id: postId,

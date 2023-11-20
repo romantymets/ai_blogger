@@ -1,0 +1,44 @@
+type Comment {
+    id: ID
+    content: String
+    createdAt: Date
+    updatedAt: Date
+    author: User
+    authorId: ID
+    postId: ID
+    post: Post
+}
+
+type CommentPayload {
+    id: ID
+    content: String
+    createdAt: Date
+    updatedAt: Date
+    authorId: ID
+    postId: ID
+}
+
+type CommentsByPost {
+    id: ID
+    content: String
+    createdAt: Date
+    updatedAt: Date
+    authorId: ID
+    postId: ID
+    author: AuthorPayload
+}
+
+input CreateCommentInput {
+    comment: String!
+    authorId: ID!
+    postId: ID!
+}
+
+type Query {
+    getCommentsByPost(id: ID!): [CommentsByPost]
+}
+
+type Mutation {
+    deleteComment(id:ID!): CommentPayload!
+    createComment(input: CreateCommentInput!): CommentPayload!
+}

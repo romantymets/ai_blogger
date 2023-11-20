@@ -1,5 +1,9 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { createComment } from '@/helpers/api/service/comment-service'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { commentValidationSchema } from '@/helpers/validationSchema/commentValidationSchema'
+import { generateResponse } from '@/utils/generateResponse'
 
 /**
  * @swagger
@@ -13,12 +17,10 @@ import { createComment } from '@/helpers/api/service/comment-service'
  *            application/json:
  *              schema:
  *               comment: string
- *               authorId: string
  *               postId: string
  *              example:
  *               comment: test post title
  *               postId: some article
- *               authorId: 123
  *      responses:
  *        '200':
  *          description: OK
@@ -39,27 +41,33 @@ import { createComment } from '@/helpers/api/service/comment-service'
  */
 export async function POST(request: NextRequest) {
   try {
-    const { comment, authorId, postId } = await request.json()
+    const userId = request.cookies.get('userId' as any)
+
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, commentValidationSchema)
+
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
+      })
+    }
+
+    const { comment, postId } = data
 
     const commentData = await createComment({
       comment,
-      authorId,
+      authorId: userId.value,
       postId,
     })
-    return new NextResponse(JSON.stringify(commentData))
+
+    return generateResponse(commentData)
   } catch (error) {
-    console.error(error)
-    return new NextResponse(
-      JSON.stringify({
-        status: error.status,
-        message: error.message,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

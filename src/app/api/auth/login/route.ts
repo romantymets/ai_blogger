@@ -1,5 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { login } from '@/helpers/api/service/auth-service'
+import { generateErrorResponse } from '@/utils/generateErrorResponse'
+import { generateResponse } from '@/utils/generateResponse'
+import { parseBody } from '@/helpers/api/middleware/parseBody'
+import { loginValidationSchema } from '@/helpers/validationSchema/loginValidationSchema'
 
 /**
  * @swagger
@@ -26,42 +30,39 @@ import { login } from '@/helpers/api/service/auth-service'
  *               email: string
  *               userId: string
  *               image: string
- *               accessToken: string
- *               refreshToken: string
  *             example:
  *               email: test@test.com
  *               userId: 123h
  *               userName: user
  *               image: some image
- *               accessToken: token
- *               refreshToken: token
  */
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
   try {
-    const result = await req.json()
-    const { email, password } = result
-    const userData = await login(email, password)
-    const response = new NextResponse(JSON.stringify(userData))
-    response.cookies.set({
-      name: 'refreshToken',
-      value: userData.refreshToken,
-      maxAge: 30 * 24 * 60 * 60 * 1000,
-      httpOnly: true,
-    } as any)
-    return response
+    const {
+      isValid,
+      errors,
+      data = {},
+    } = await parseBody(request, loginValidationSchema)
+
+    if (!isValid && errors) {
+      return generateErrorResponse({
+        name: errors[0],
+        status: 422,
+        message: errors[0],
+        errors,
+      })
+    }
+
+    const { email, password } = data
+
+    const { tokens, user } = await login(email, password)
+
+    return generateResponse(user, {
+      refreshToken: tokens.refreshToken,
+      accessToken: tokens.accessToken,
+      userId: user.userId,
+    })
   } catch (error) {
-    console.error('error ==>', error)
-    return new NextResponse(
-      JSON.stringify({
-        message: error.message || error.name,
-        name: error.name,
-        errors: error.errors,
-      }),
-      {
-        status: error.status || 500,
-        message: error.message || error.name,
-        headers: { 'content-type': 'application/json' },
-      } as any
-    )
+    return generateErrorResponse(error)
   }
 }

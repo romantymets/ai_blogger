@@ -1,6 +1,7 @@
 'use client'
 import React from 'react'
 import { useRouter } from 'next/navigation'
+import { yupResolver } from '@hookform/resolvers/yup'
 import { useForm } from 'react-hook-form'
 
 import Link from 'next/link'
@@ -8,10 +9,10 @@ import Image from 'next/image'
 
 import { UserCircleIcon } from '@heroicons/react/24/solid'
 
-import { userService } from '@/services/user.service'
+// import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
-import useToggle from '@/hooks/useToggle'
+// import useToggle from '@/hooks/useToggle'
 import useImageUpload from '@/hooks/useImageUpload'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
@@ -20,14 +21,11 @@ import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput'
 import UploadImage from '@/components/UIComponents/UploadImage/UploadImage'
 
 import { SIGN_UP, LOG_IN } from '@/constants/navigationLinks'
-import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
-
-interface IDefaultValues {
-  userName: string
-  email: string
-  password: string
-  aboutUser: string
-}
+import {
+  RegistrationCredential,
+  registrationValidationSchema,
+} from '@/helpers/validationSchema/registrationValidationSchema'
+import { useRegistrationMutation } from '@/gql/graphql'
 
 const SignUpPage = () => {
   const {
@@ -40,52 +38,71 @@ const SignUpPage = () => {
     dragActive,
   } = useImageUpload()
 
-  const { open: loading, onOpen, onClose } = useToggle()
+  // const { open: loading, onOpen, onClose } = useToggle()
+
+  const [registrationMutation, { loading }] = useRegistrationMutation()
 
   const router = useRouter()
-
-  const defaultValues: IDefaultValues = {
-    userName: '',
-    email: '',
-    password: '',
-    aboutUser: '',
-  }
 
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues,
+    resolver: yupResolver(registrationValidationSchema),
     mode: 'onBlur',
   })
 
-  const onSubmit = (data: IDefaultValues) => {
-    onOpen()
-    const formData = new FormData()
-    formData.append('userName', data.userName)
-    formData.append('email', data.email)
-    formData.append('password', data.password)
-    formData.append('aboutUser', data.aboutUser)
-    if (selectedImage) {
-      formData.append('image', selectedImage)
-    }
-    userService
-      .register(formData)
-      .then(() => {
+  const onSubmit = (data: RegistrationCredential) => {
+    registrationMutation({
+      variables: {
+        userInput: {
+          userName: data.userName,
+          aboutUser: data.aboutUser,
+          password: data.password,
+          email: data.email,
+        },
+        ...(selectedImage && { image: selectedImage }),
+      },
+    })
+      .then(({ data }) => {
         alertService.success('Registration successful')
-        onClose()
         router.push(LOG_IN.href)
       })
       .catch((error) => {
         console.error(error)
         alertService.error(error.message || 'Registration failed')
-        onClose()
-      })
-      .finally(() => {
-        onClose()
       })
   }
+
+  // REST example
+
+  // const onSubmit = (data: RegistrationCredential) => {
+  //   onOpen()
+  //   const formData = new FormData()
+  //   formData.append('userName', data.userName)
+  //   formData.append('email', data.email)
+  //   formData.append('password', data.password)
+  //   formData.append('aboutUser', data.aboutUser)
+  //   if (selectedImage) {
+  //     formData.append('image', selectedImage)
+  //   }
+  //   userService
+  //     .register(formData)
+  //     .then(() => {
+  //       alertService.success('Registration successful')
+  //       onClose()
+  //       router.push(LOG_IN.href)
+  //     })
+  //     .catch((error) => {
+  //       console.error(error)
+  //       alertService.error(error.message || 'Registration failed')
+  //       onClose()
+  //     })
+  //     .finally(() => {
+  //       onClose()
+  //     })
+  // }
 
   return (
     <form className="my-8" onSubmit={handleSubmit(onSubmit)}>
@@ -108,10 +125,8 @@ const SignUpPage = () => {
                 label={'User Name'}
                 autoComplete={'userName'}
                 error={Boolean(errors.userName)}
-                helperText={errors.userName?.message}
-                register={register('userName', {
-                  required: 'User Name is required',
-                })}
+                helperText={errors?.userName?.message as string}
+                register={register('userName')}
               />
               <TextInput
                 id={'email'}
@@ -120,14 +135,8 @@ const SignUpPage = () => {
                 autoComplete={'email'}
                 label={'Email address'}
                 error={Boolean(errors.email)}
-                helperText={errors.email?.message}
-                register={register('email', {
-                  required: 'Email is required',
-                  pattern: {
-                    value: EmailRegExp,
-                    message: 'Email not correct',
-                  },
-                })}
+                helperText={errors.email?.message as string}
+                register={register('email')}
               />
 
               <PasswordInput
@@ -136,15 +145,8 @@ const SignUpPage = () => {
                 autoComplete={'password'}
                 label={'Password'}
                 error={Boolean(errors.password)}
-                helperText={errors.password?.message}
-                register={register('password', {
-                  required: 'Password is required',
-                  pattern: {
-                    value: PasswordRegExp,
-                    message:
-                      'Minimum eight characters, at least one letter and one number',
-                  },
-                })}
+                helperText={errors.password?.message as string}
+                register={register('password')}
               />
             </div>
 
@@ -182,7 +184,7 @@ const SignUpPage = () => {
                     alt={'image'}
                     width={80}
                     height={80}
-                    className={'rounded-full w-20 h-20'}
+                    className={'rounded-full w-20 h-20 object-cover'}
                   />
                 ) : (
                   <UserCircleIcon

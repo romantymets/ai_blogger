@@ -4,27 +4,31 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 
-import useToggle from '@/hooks/useToggle'
-
-import { userService } from '@/services/user.service'
+// import useToggle from '@/hooks/useToggle'
+//
+// import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
 
 import { HOME, SIGN_UP, RESET_PASSWORD } from '@/constants/navigationLinks'
-import { EmailRegExp, PasswordRegExp } from '@/constants/regExp'
 
 import TextInput from '@/components/UIComponents/Inputs/TextInput'
 import BluButton from '@/components/UIComponents/Buttons/BluButton'
 import PasswordInput from '@/components/UIComponents/Inputs/PasswordInput/PasswordInput'
-
-interface IDefaultValues {
-  email: string
-  password: string
-}
+import { yupResolver } from '@hookform/resolvers/yup'
+import {
+  LoginCredential,
+  loginValidationSchema,
+} from '@/helpers/validationSchema/loginValidationSchema'
+import { useLoginMutation } from '@/gql/graphql'
+import { saveUser } from '@/services/user.service'
 
 const LoginPage = () => {
   const router = useRouter()
-  const { open: loading, onOpen, onClose } = useToggle()
-  const defaultValues: IDefaultValues = {
+  // const { open: loading, onOpen, onClose } = useToggle()
+
+  const [loginMutation, { loading }] = useLoginMutation()
+
+  const defaultValues = {
     email: '',
     password: '',
   }
@@ -35,24 +39,43 @@ const LoginPage = () => {
     formState: { errors },
   } = useForm({
     defaultValues,
+    resolver: yupResolver(loginValidationSchema),
     mode: 'onBlur',
   })
 
-  const onSubmit = ({ email, password }: IDefaultValues) => {
-    onOpen()
-    return userService
-      .login(email, password)
-      .then(() => {
+  const onSubmit = (data: LoginCredential) => {
+    return loginMutation({
+      variables: {
+        email: data.email,
+        password: data.password,
+      },
+    })
+      .then(({ data }) => {
+        saveUser(data.login)
         alertService.success('Authorization successful')
-        onClose()
         router.push(HOME.href)
       })
       .catch((e) => {
         console.error(e)
         alertService.error(e.message)
-        onClose()
       })
   }
+
+  // const onSubmit = (data: LoginCredential) => {
+  //   onOpen()
+  //   return userService
+  //     .login(data)
+  //     .then(() => {
+  //       alertService.success('Authorization successful')
+  //       onClose()
+  //       router.push(HOME.href)
+  //     })
+  //     .catch((e) => {
+  //       console.error(e)
+  //       alertService.error(e.message)
+  //       onClose()
+  //     })
+  // }
 
   return (
     <Fragment>
@@ -72,14 +95,8 @@ const LoginPage = () => {
               autoComplete={'email'}
               label={'Email address'}
               error={Boolean(errors.email)}
-              helperText={errors.email?.message}
-              register={register('email', {
-                required: 'Email is required',
-                pattern: {
-                  value: EmailRegExp,
-                  message: 'Email not correct',
-                },
-              })}
+              helperText={errors.email?.message as string}
+              register={register('email')}
             />
 
             <PasswordInput
@@ -88,15 +105,8 @@ const LoginPage = () => {
               autoComplete={'password'}
               label={'Password'}
               error={Boolean(errors.password)}
-              helperText={errors.password?.message}
-              register={register('password', {
-                required: 'Password is required',
-                pattern: {
-                  value: PasswordRegExp,
-                  message:
-                    'Minimum eight characters, at least one letter and one number',
-                },
-              })}
+              helperText={errors.password?.message as string}
+              register={register('password')}
             />
 
             <p className="mt-10 text-right text-sm text-gray-500">

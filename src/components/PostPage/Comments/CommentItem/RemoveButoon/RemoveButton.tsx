@@ -1,33 +1,32 @@
 'use client'
 import { useRouter } from 'next/navigation'
 
-import useToggle from '@/hooks/useToggle'
 import useGetUser from '@/hooks/useGetUser'
 
-import { commentService } from '@/services/comment.service'
 import { alertService } from '@/services/alerts-service'
 
 import { ArchiveBoxXMarkIcon } from '@heroicons/react/24/solid'
 import { Fragment } from 'react'
+import { useDeleteCommentMutation } from '@/gql/graphql'
 
 const RemoveButton = ({ id, authorId }: { id: string; authorId: string }) => {
-  const { open: loading, onOpen, onClose } = useToggle()
+  const [deleteCommentMutation, { loading }] = useDeleteCommentMutation()
 
   const { user } = useGetUser()
 
   const router = useRouter()
 
   const handleDelete = () => {
-    onOpen()
-    commentService
-      .deleteComment(id)
+    deleteCommentMutation({
+      variables: {
+        id,
+      },
+    })
       .then(() => {
-        onClose()
         alertService.success('Comment successful deleted')
         router.refresh()
       })
       .catch((error) => {
-        onClose()
         console.error(error)
       })
   }

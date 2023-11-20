@@ -2,34 +2,35 @@ import prisma from '@/libs/prisma'
 import { CreateUserCredential } from '@/models/userServiceModel'
 import bcrypt from 'bcrypt'
 import {
-  findToken,
   generateTokens,
-  removeToken,
-  saveToken,
   validateRefreshToken,
 } from '@/helpers/api/service/token-service'
-import { createUser } from '@/helpers/api/service/user-service'
+import { createUser, findUserById } from '@/helpers/api/service/user-service'
 import { generateUserDto } from '@/helpers/api/dtos/userDto'
 import { ApiError } from '@/helpers/api/exceptions/api-error'
 import { generateTokensDto } from '@/helpers/api/dtos/tokensDto'
+import { User } from 'prisma/prisma-client'
 
 export const findUserFromDbByEmail = async (email: string) =>
-  await prisma.users.findUnique({
+  await prisma.user.findUnique({
     where: {
       email,
     },
   })
 
+export const generateUserData = async (user: User) => {
+  const userDto = await generateUserDto(user)
+  const tokensDto = await generateTokensDto(user)
+  const tokens = await generateTokens(tokensDto)
+  return { userDto, tokens }
+}
+
 export const registration = async (payload: CreateUserCredential) => {
   const candidate = await createUser(payload)
 
-  const userDto = await generateUserDto(candidate)
-  const tokensDto = await generateTokensDto(candidate)
-  const tokens = await generateTokens(tokensDto)
-  await saveToken(userDto.userId, tokens.refreshToken)
+  const { userDto } = await generateUserData(candidate)
   return {
-    ...tokens,
-    ...userDto,
+    user: userDto,
   }
 }
 
@@ -39,44 +40,38 @@ export const login = async (email: string, password: string) => {
     throw ApiError.BadRequest(`User with ${email} not found`)
   }
 
-  const isPassEquals = await bcrypt.compare(password, candidate.hashedPassword)
+  const isPassEquals = await bcrypt.compare(password, candidate.password)
 
   if (!isPassEquals) {
     throw ApiError.BadRequest('password incorrect')
   }
-  const userDto = await generateUserDto(candidate)
-  const tokensDto = await generateTokensDto(candidate)
-  const tokens = await generateTokens(tokensDto)
-  await saveToken(candidate.id, tokens.refreshToken)
+  const { userDto, tokens } = await generateUserData(candidate)
+
   return {
-    ...tokens,
-    ...userDto,
+    user: userDto,
+    tokens,
   }
 }
 
-const logout = async (refreshToken: string) => await removeToken(refreshToken)
-
-export const refresh = async (refreshToken: string) => {
-  if (!refreshToken) {
-    throw ApiError.BadRequest('Token not found')
-  }
+export const refresh = async (refreshToken: string, userId: string) => {
   const isTokenValid = await validateRefreshToken(refreshToken)
-  const tokenfromDB = await findToken(refreshToken)
-  if (!isTokenValid || !tokenfromDB) {
-    throw ApiError.BadRequest('Token not valid')
+  if (!isTokenValid) {
+    return null
   }
-  const user = await prisma.users.findUnique({
-    where: {
-      id: tokenfromDB.userId,
-    },
-  })
-  const userDto = await generateUserDto(user)
-  const tokensDto = await generateTokensDto(user)
-  const tokens = await generateTokens(tokensDto)
-  await saveToken(userDto.userId, tokens.refreshToken)
-  return {
-    ...tokens,
-    ...userDto,
+  try {
+    const user = await findUserById(userId)
+
+    const { userDto, tokens } = await generateUserData(user)
+
+    if (!userDto?.userId || !tokens) {
+      return null
+    }
+    return {
+      ...tokens,
+      userId: userDto.userId,
+    }
+  } catch (e) {
+    return null
   }
 }
 
@@ -86,12 +81,12 @@ export const resetPassword = async (email: string, password: string) => {
     throw ApiError.BadRequest(`User with ${email} not found`)
   }
   const hashedPassword = await bcrypt.hash(password, 3)
-  const user = await prisma.users.update({
+  const user = await prisma.user.update({
     where: {
       id: candidate.id,
     },
     data: {
-      hashedPassword,
+      password: hashedPassword,
     },
   })
   return await generateUserDto(user)
