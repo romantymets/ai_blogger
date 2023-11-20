@@ -3,10 +3,15 @@ import Link from 'next/link'
 
 import { Disclosure } from '@headlessui/react'
 
-import Profile from '@/components/Navbar/Profile'
+import dynamic from 'next/dynamic'
+
 import { HOME } from '@/constants/navigationLinks'
 import logo from 'public/logo.svg'
 import Image from 'next/image'
+
+const Profile = dynamic(() => import('@/components/Navbar/Profile'), {
+  ssr: false,
+})
 
 const Navbar = () => {
   return (

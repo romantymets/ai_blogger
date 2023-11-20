@@ -1,12 +1,17 @@
-import { Inter } from 'next/font/google'
+import React from 'react'
+import { Lora } from 'next/font/google'
 
-import Footer from '@/components/Footer'
+import { ApolloWrapper } from '@/libs/apollo-provider'
 
-import Navbar from '../components/Navbar'
-import './globals.css'
 import { classNames } from '@/utils/classNames'
 
-const inter = Inter({ subsets: ['latin'] })
+import Footer from '@/components/Footer'
+import Navbar from '@/components/Navbar'
+import Alert from '@/components/Alert'
+
+import './globals.css'
+
+const lora = Lora({ subsets: ['latin'] })
 
 export const metadata = {
   title: 'AI | Blogger',
@@ -20,15 +25,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body
-        className={classNames(inter.className, 'min-h-screen flex flex-col')}
-      >
-        <Navbar />
-        <main className="flex flex-col flex-1 items-center overflow-x-hidden">
-          {children}
-        </main>
-        <Footer />
-      </body>
+      <ApolloWrapper>
+        <body
+          className={classNames(lora.className, 'min-h-screen flex flex-col')}
+        >
+          <Navbar />
+          <Alert />
+          <main className="flex flex-col flex-1 items-center overflow-x-hidden">
+            {children}
+          </main>
+          <Footer />
+        </body>
+      </ApolloWrapper>
     </html>
   )
 }

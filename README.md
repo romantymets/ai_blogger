@@ -4,12 +4,41 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 First, run the development server:
 
+api run:
+
+prisma generate
+
+api documentation:
+
+/api-doc
+
 ```bash
 npm run dev
 # or
 yarn dev
 # or
 pnpm dev
+```
+
+## Test
+
+run docker
+
+start local db:
+
+```bash
+npm run test
+# or
+yarn test
+
+```
+
+after test:
+
+
+```bash
+yarn docker:down
+npm run docker:down
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.

@@ -18,6 +18,13 @@ module.exports = {
       ...colors,
       gallery: '#EFEFEFCC',
       royalBlue: '#3652E1',
+      natural200: '#E5E5E5',
+      trout: '#495057',
+      paleSky: '#6C757D',
+      athensGray: '#F8F9FA',
+      silver: '#C4C4C4',
+      recentBg: 'rgba(229, 229, 229, 0.30)',
+      azureRadiance: '#0089FF',
     },
     extend: {
       backgroundImage: {
@@ -27,5 +34,11 @@ module.exports = {
       },
     },
   },
-  plugins: ['@tailwindcss/forms'],
+  plugins: [
+    '@tailwindcss/forms',
+    function ({ addVariant }) {
+      addVariant('child', '& > *')
+      addVariant('child-hover', '& > *:hover')
+    },
+  ],
 }

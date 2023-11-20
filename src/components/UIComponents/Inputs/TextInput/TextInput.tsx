@@ -7,9 +7,9 @@ interface InputProps {
   name: string
   type: string
   label: string
-  autoComplete: string
   className?: string
   error?: boolean
+  autoComplete?: string
   helperText?: string
   register?: UseFormRegisterReturn<any>
   rest?: any
@@ -21,7 +21,6 @@ const TextInput = ({
   label,
   className,
   type,
-  autoComplete,
   error,
   register,
   helperText,
@@ -40,8 +39,7 @@ const TextInput = ({
           id={id}
           name={name}
           type={type}
-          autoComplete={autoComplete}
-          required
+          placeholder={label}
           className={classNames(
             'block w-full rounded-md border-0 py-1.5 px-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6',
             className || '',
