@@ -23,6 +23,7 @@ export interface Post {
   createdAt: Date
   comments: Comment[] | []
   likes: LikeItem[] | []
+  popularity?: number
 }
 
 export interface RecentPost {

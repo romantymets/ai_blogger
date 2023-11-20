@@ -20,6 +20,27 @@ yarn dev
 pnpm dev
 ```
 
+## Test
+
+run docker
+
+start local db:
+
+```bash
+npm run test
+# or
+yarn test
+
+```
+
+after test:
+
+
+```bash
+yarn docker:down
+npm run docker:down
+```
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.

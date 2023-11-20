@@ -11,6 +11,7 @@ const PostBody = ({
   id,
   likes,
   comments,
+  popularity,
 }: Post) => {
   return (
     <section className={'container max-w-[860px] flex flex-col px-3.5'}>
@@ -30,6 +31,7 @@ const PostBody = ({
         likes={likes}
         postId={id}
         comments={comments?.length}
+        popularity={popularity}
       />
     </section>
   )

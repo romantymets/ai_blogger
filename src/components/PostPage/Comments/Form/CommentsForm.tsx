@@ -1,19 +1,23 @@
 'use client'
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
 
-import useToggle from '@/hooks/useToggle'
+// import useToggle from '@/hooks/useToggle'
 
 import { alertService } from '@/services/alerts-service'
 
-import { classNames } from '@/utils/classNames'
-import { PostAuthor } from '@/models/postsModel'
-
-import { commentService } from '@/services/comment.service'
 import useGetUser from '@/hooks/useGetUser'
+
+import { classNames } from '@/utils/classNames'
+
+// import { commentService } from '@/services/comment.service'
+import { useCreateCommentMutation } from '@/gql/graphql'
+
 import CommentAuthor from '@/components/PostPage/Comments/CommentAuthor/CommentAuthor'
 import Spinner from '@/components/UIComponents/Spinner'
-import { useRouter } from 'next/navigation'
+
+import { PostAuthor } from '@/models/postsModel'
 
 interface IDefaultValues {
   comment: string
@@ -25,8 +29,11 @@ interface Props {
 }
 
 const CommentsForm = ({ postId }: Props) => {
-  const { open: loading, onOpen, onClose } = useToggle()
+  // const { open: loading, onOpen, onClose } = useToggle()
   const router = useRouter()
+
+  const [createCommentMutation, { loading }] = useCreateCommentMutation()
+
   const defaultValues = {
     comment: '',
   }
@@ -48,24 +55,50 @@ const CommentsForm = ({ postId }: Props) => {
       alertService.error('Login please')
       return
     }
-    onOpen()
-    return commentService
-      .createComment({
-        comment,
-        postId,
-      })
+
+    createCommentMutation({
+      variables: {
+        input: {
+          comment,
+          postId,
+          authorId: user.userId,
+        },
+      },
+    })
       .then(() => {
         alertService.success('Comment successful created')
         router.refresh()
         reset()
-        onClose()
       })
       .catch((e) => {
         console.error(e)
         alertService.error(e.message)
-        onClose()
       })
   }
+
+  // const onSubmit = ({ comment }: IDefaultValues) => {
+  //   if (!user?.userId) {
+  //     alertService.error('Login please')
+  //     return
+  //   }
+  //   onOpen()
+  //   return commentService
+  //     .createComment({
+  //       comment,
+  //       postId,
+  //     })
+  //     .then(() => {
+  //       alertService.success('Comment successful created')
+  //       router.refresh()
+  //       reset()
+  //       onClose()
+  //     })
+  //     .catch((e) => {
+  //       console.error(e)
+  //       alertService.error(e.message)
+  //       onClose()
+  //     })
+  // }
 
   return (
     <form

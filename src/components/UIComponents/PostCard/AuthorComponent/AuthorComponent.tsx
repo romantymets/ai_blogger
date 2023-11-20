@@ -2,8 +2,9 @@
 import React from 'react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
+import isNumber from 'lodash/isNumber'
 
-import { UserCircleIcon } from '@heroicons/react/24/solid'
+import { UserCircleIcon, StarIcon } from '@heroicons/react/24/solid'
 import { ChatBubbleLeftEllipsisIcon } from '@heroicons/react/24/outline'
 import { AUTHOR } from '@/constants/navigationLinks'
 
@@ -16,6 +17,7 @@ interface Props {
   authorId: string
   postId: string
   likes: LikeItem[] | []
+  popularity?: number
 }
 
 const AuthorComponent = ({
@@ -24,6 +26,7 @@ const AuthorComponent = ({
   authorId,
   postId,
   likes,
+  popularity,
 }: Props) => {
   const router = useRouter()
 
@@ -59,7 +62,13 @@ const AuthorComponent = ({
         <div className={'flex flex-col ml-4'}>
           <p>By {author.userName}</p>
           <div className={'flex'}>
-            <div className="text-paleSky text-xs flex items-center">
+            {isNumber(popularity) && (
+              <div className={'text-orange-400 flex items-center mr-3'}>
+                <StarIcon className="h-[20px] w-[20px]" />
+                <span className="ml-2">{popularity || 0}</span>
+              </div>
+            )}
+            <div className="text-paleSky flex items-center">
               <ChatBubbleLeftEllipsisIcon className="h-[20px] w-[24px]" />
               <span className="ml-3">{comments || 0}</span>
             </div>

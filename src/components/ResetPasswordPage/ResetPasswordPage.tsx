@@ -4,7 +4,9 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 
-import useToggle from '@/hooks/useToggle'
+import { useResetPasswordMutation } from '@/gql/graphql'
+
+// import useToggle from '@/hooks/useToggle'
 
 import { userService } from '@/services/user.service'
 import { alertService } from '@/services/alerts-service'
@@ -27,7 +29,9 @@ import {
 
 const ResetPasswordPage = () => {
   const router = useRouter()
-  const { open: loading, onOpen, onClose } = useToggle()
+  // const { open: loading, onOpen, onClose } = useToggle()
+
+  const [resetPasswordMutation, { loading }] = useResetPasswordMutation()
 
   const defaultValues = {
     email: '',
@@ -46,14 +50,17 @@ const ResetPasswordPage = () => {
   })
 
   const onSubmit = (data: ResetPasswordCredential) => {
-    onOpen()
-    return userService
-      .resetPassword(data)
-      .then((result) => {
+    return resetPasswordMutation({
+      variables: {
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+      },
+    })
+      .then(({ data }) => {
         const currentUser = userService.userValue
         alertService.success('Password successful updated')
-        onClose()
-        if (currentUser?.userId === result?.userId) {
+        if (currentUser?.userId === data?.resetPassword?.userId) {
           userService.logout()
           router.push(LOG_IN.href)
           return
@@ -63,9 +70,30 @@ const ResetPasswordPage = () => {
       .catch((e) => {
         console.error(e)
         alertService.error(e.message)
-        onClose()
       })
   }
+
+  // const onSubmit = (data: ResetPasswordCredential) => {
+  //   onOpen()
+  //   return userService
+  //     .resetPassword(data)
+  //     .then((result) => {
+  //       const currentUser = userService.userValue
+  //       alertService.success('Password successful updated')
+  //       onClose()
+  //       if (currentUser?.userId === result?.userId) {
+  //         userService.logout()
+  //         router.push(LOG_IN.href)
+  //         return
+  //       }
+  //       router.push(HOME.href)
+  //     })
+  //     .catch((e) => {
+  //       console.error(e)
+  //       alertService.error(e.message)
+  //       onClose()
+  //     })
+  // }
 
   return (
     <Fragment>

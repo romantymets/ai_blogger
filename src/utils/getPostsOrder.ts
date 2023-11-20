@@ -1,18 +1,18 @@
-import { mostPopular, newest } from '@/components/HomePage/SortsList/SortsLit'
+import { MOST_POPULAR_POST, NEWEST_POST } from '@/constants/pagination'
 
 export const getPostsOrder = (key?: string) => {
   switch (key) {
-    case newest.key:
+    case NEWEST_POST.key:
       return [{ createdAt: 'desc' }]
-    case mostPopular.key:
+    case MOST_POPULAR_POST.key:
       return [
         {
-          likes: {
+          comments: {
             _count: 'desc',
           },
         },
         {
-          comments: {
+          likes: {
             _count: 'desc',
           },
         },
